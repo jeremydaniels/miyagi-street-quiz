@@ -32,6 +32,12 @@ Mathematics and English are the same subject wherever they appear (one shared po
 
 The General route skips screens 2 and 3 and uses the `general` subject.
 
+When a subject can't be played yet:
+
+- A subject is only playable when it has at least one question at every level (easy, medium and hard). A subject with no questions at all is disabled with "No questions yet". A subject missing only some levels is disabled with a label naming them, e.g. "No hard questions yet".
+- The same rule applies to the **General** button on the Route screen.
+- If a level has only one question, **Swap question** is disabled on that screen.
+
 ### 4. Questions (three screens)
 
 Always three questions, in order: **Easy**, **Medium**, **Hard**. Each screen shows:
@@ -49,6 +55,8 @@ After reveal:
 - Two buttons: **Got it** and **Missed it**. Tapping either moves to the next question. There's no going back after marking.
 
 The interviewer judges close matches. Students won't always use textbook wording.
+
+Every question screen also has a small **End quiz** button, kept apart from the main buttons so it can't be tapped by accident. It asks "End this quiz? It won't count." and, if confirmed, returns to Route without adding to the person count. It's there for when a student walks off mid-quiz.
 
 ### 5. Score
 
