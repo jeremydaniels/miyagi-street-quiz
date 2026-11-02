@@ -10,11 +10,15 @@ const DEPARTMENTS: Department[] = ['science', 'commercial', 'art']
 export default function DepartmentScreen({ onPick, onBack }: Props) {
   return (
     <main className="screen">
-      <button className="back" onClick={onBack}>
-        ← Back
-      </button>
-      <h1>Department</h1>
-      <div className="buttons">
+      <header className="topbar">
+        <button className="back" onClick={onBack}>
+          ← Back
+        </button>
+      </header>
+      <div className="content">
+        <h1>Department</h1>
+      </div>
+      <div className="actions">
         {DEPARTMENTS.map((d) => (
           <button key={d} onClick={() => onPick(d)}>
             {DEPARTMENT_NAMES[d]}

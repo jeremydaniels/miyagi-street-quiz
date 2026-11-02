@@ -1,139 +1,409 @@
+/* ==========================================================================
+   Design tokens. Branding is swapped in by changing only this block.
+   Light theme only: the app is used outdoors in bright sunlight.
+   ========================================================================== */
+:root {
+  color-scheme: light;
+
+  /* Colours (placeholders until Miyagi branding) */
+  --color-bg: #ffffff;
+  --color-text: #0d0d0d;
+  --color-border: #0d0d0d;
+  --color-pressed: #dcdcdc;
+  --color-accent: #1e3a8a;
+  --color-accent-pressed: #142863;
+  --color-on-accent: #ffffff;
+  --color-success: #0a5c24;
+  --color-success-pressed: #063d18;
+  --color-danger: #a1170f;
+  --color-danger-pressed: #74100a;
+  --color-on-status: #ffffff;
+  --color-disabled-bg: #e6e6e6;
+  --color-disabled-text: #3d3d3d;
+  --color-focus: #000000;
+
+  /* Type */
+  --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-weight-normal: 600;
+  --font-weight-bold: 800;
+  --font-weight-black: 900;
+  --font-size-base: 1.125rem;
+  --font-size-small: 1rem;
+  --font-size-label: 0.95rem;
+  --font-size-button: 1.3rem;
+  --font-size-heading: 1.75rem;
+  --font-size-meta: 1.15rem;
+  --font-size-question: clamp(2rem, 8.5vw, 2.6rem);
+  --font-size-answer: 1.4rem;
+  --font-size-score: clamp(6rem, 32vw, 9rem);
+  --line-height: 1.35;
+  --line-height-tight: 1.2;
+
+  /* Spacing and shape */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius: 12px;
+  --border-width: 3px;
+  --focus-width: 4px;
+  --tap-min: 56px;
+  --tap-small: 44px; /* End quiz only: deliberate exception, see CLAUDE.md */
+  --tap-mark: 64px;
+  --max-width: 520px;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  font-size: 18px;
-  line-height: 1.4;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
-.screen {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1 {
-  font-size: 1.5rem;
+  margin: 0;
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-black);
+  line-height: var(--line-height-tight);
+}
+
+p {
   margin: 0;
 }
 
-.meta {
-  margin: 0;
-  font-weight: 600;
-}
-
-.buttons {
+/* ==========================================================================
+   Screen layout: top bar, content, then main buttons at the bottom (thumb zone)
+   ========================================================================== */
+.screen {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-button {
-  min-height: 56px;
-  width: 100%;
-  padding: 12px 16px;
-  font: inherit;
-  font-size: 1.25rem;
-  font-weight: 600;
-  border: 2px solid #000;
-  border-radius: 8px;
-  background: #fff;
-  color: #000;
-}
-
-button:disabled {
-  border-color: #aaa;
-  color: #888;
-  background: #eee;
-}
-
-button .sub {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 400;
-}
-
-button.back {
-  width: auto;
-  align-self: flex-start;
-  font-size: 1rem;
-}
-
-/* Kept small and well away from the main buttons so it isn't hit by accident. */
-button.end {
-  width: auto;
-  min-height: 44px;
-  align-self: center;
-  margin-top: 48px;
-  font-size: 0.9rem;
-  font-weight: 400;
-  border-width: 1px;
-}
-
-.question {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.answer {
-  border: 2px solid #000;
-  border-radius: 8px;
-  padding: 12px 16px;
-}
-
-.answer-label {
-  margin: 0;
-  font-weight: 600;
-}
-
-.answer ul {
-  margin: 8px 0;
-  padding-left: 24px;
-  font-size: 1.4rem;
-}
-
-.note {
-  margin: 0;
-  font-style: italic;
-}
-
-.score {
-  font-size: 4rem;
-  font-weight: 800;
-  text-align: center;
-  margin: 0;
-}
-
-.recap {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: var(--space-4);
+  max-width: var(--max-width);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) 0;
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
 }
 
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: max(var(--space-5), env(safe-area-inset-bottom));
+}
+
+/* On the question screen the buttons stay put while long answer lists scroll. */
+.actions.sticky {
+  position: sticky;
+  bottom: 0;
+  margin: 0 calc(-1 * var(--space-4));
+  padding: var(--space-3) var(--space-4) max(var(--space-5), env(safe-area-inset-bottom));
+  background: var(--color-bg);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font: inherit;
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button:active {
+  background: var(--color-pressed);
+}
+
+button:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  color: var(--color-disabled-text);
+  background: var(--color-disabled-bg);
+  border-style: dashed;
+  border-color: var(--color-disabled-text);
+  cursor: default;
+}
+
+button .sub {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-normal);
+}
+
+button.primary {
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+button.primary:active {
+  background: var(--color-accent-pressed);
+}
+
+button.got,
+button.missed {
+  flex-direction: row;
+  gap: var(--space-2);
+  min-height: var(--tap-mark);
+  color: var(--color-on-status);
+}
+
+button.got {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+button.got:active {
+  background: var(--color-success-pressed);
+}
+
+button.missed {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+button.missed:active {
+  background: var(--color-danger-pressed);
+}
+
+button.got .icon,
+button.missed .icon {
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+/* Small buttons in the top bar */
+button.back,
 button.menu-toggle {
   width: auto;
-  font-size: 1rem;
+  font-size: var(--font-size-small);
+}
+
+/* End quiz: small and in the top corner, far from the thumb, so it isn't hit by accident. */
+button.end {
+  width: auto;
+  min-height: var(--tap-small);
+  margin-left: auto;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-label);
+  border-width: 2px;
+}
+
+/* ==========================================================================
+   Route screen
+   ========================================================================== */
+.meta {
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-bold);
 }
 
 .menu {
-  border: 2px solid #000;
-  border-radius: 8px;
-  padding: 12px;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+/* ==========================================================================
+   Question screen
+   ========================================================================== */
+.progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.progress .level {
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+
+.progress .sep {
+  display: none;
+}
+
+.question {
+  font-size: var(--font-size-question);
+  font-weight: var(--font-weight-black);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.answer-label {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.answer ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--font-size-answer);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.note {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-base);
+  border-left: calc(var(--border-width) * 2) solid var(--color-accent);
+}
+
+/* Room so the last line of content clears the sticky buttons */
+.question-screen .content {
+  padding-bottom: var(--space-4);
+}
+
+/* ==========================================================================
+   Score screen (may be shown to the camera)
+   ========================================================================== */
+.score-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-4) 0;
+}
+
+.score-label {
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.score {
+  font-size: var(--font-size-score);
+  font-weight: var(--font-weight-black);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.recap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recap li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.recap .mark {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1.3rem;
+  font-weight: var(--font-weight-black);
+  color: var(--color-on-status);
+  border-radius: 50%;
+}
+
+.recap .mark.got {
+  background: var(--color-success);
+}
+
+.recap .mark.missed {
+  background: var(--color-danger);
+}
+
+/* ==========================================================================
+   Motion: none is used; make sure nothing sneaks in.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }

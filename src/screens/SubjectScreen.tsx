@@ -15,11 +15,15 @@ type Props = {
 export default function SubjectScreen({ department, onPick, onBack }: Props) {
   return (
     <main className="screen">
-      <button className="back" onClick={onBack}>
-        ← Back
-      </button>
-      <h1>{DEPARTMENT_NAMES[department]} subject</h1>
-      <div className="buttons">
+      <header className="topbar">
+        <button className="back" onClick={onBack}>
+          ← Back
+        </button>
+      </header>
+      <div className="content">
+        <h1>{DEPARTMENT_NAMES[department]} subject</h1>
+      </div>
+      <div className="actions">
         {DEPARTMENT_SUBJECTS[department].map((subject) => {
           const notReady = notReadyLabel(subject)
           return (

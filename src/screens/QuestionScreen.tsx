@@ -23,26 +23,29 @@ export default function QuestionScreen({ question, number, onSwap, onMark, onBac
   }
 
   return (
-    <main className="screen">
-      {onBack && (
-        <button className="back" onClick={onBack}>
-          ← Back
-        </button>
-      )}
-      <p className="meta">
-        {LEVEL_NAMES[question.level]} · {number} of 3 · {SUBJECT_NAMES[question.subject]}
-      </p>
-      <p className="question">{question.q}</p>
-
-      {!revealed ? (
-        <div className="buttons">
-          <button onClick={() => setRevealed(true)}>Show answer</button>
-          <button onClick={onSwap} disabled={!canSwap}>
-            Swap question
+    <main className="screen question-screen">
+      <header className="topbar">
+        {onBack && (
+          <button className="back" onClick={onBack}>
+            ← Back
           </button>
-        </div>
-      ) : (
-        <>
+        )}
+        <button className="end" onClick={endQuiz}>
+          End quiz
+        </button>
+      </header>
+
+      <div className="content">
+        <p className="meta progress">
+          <span className="level">
+            {LEVEL_NAMES[question.level]} · {number} of 3
+          </span>
+          <span className="sep"> · </span>
+          <span className="subject">{SUBJECT_NAMES[question.subject]}</span>
+        </p>
+        <p className="question">{question.q}</p>
+
+        {revealed && (
           <section className="answer">
             {answersLabel && <p className="answer-label">{answersLabel}</p>}
             <ul>
@@ -52,16 +55,36 @@ export default function QuestionScreen({ question, number, onSwap, onMark, onBac
             </ul>
             {question.note && <p className="note">{question.note}</p>}
           </section>
-          <div className="buttons">
-            <button onClick={() => onMark(true)}>Got it</button>
-            <button onClick={() => onMark(false)}>Missed it</button>
-          </div>
-        </>
-      )}
+        )}
+      </div>
 
-      <button className="end" onClick={endQuiz}>
-        End quiz
-      </button>
+      <div className="actions sticky">
+        {!revealed ? (
+          <>
+            <button className="primary" onClick={() => setRevealed(true)}>
+              Show answer
+            </button>
+            <button onClick={onSwap} disabled={!canSwap}>
+              Swap question
+            </button>
+          </>
+        ) : (
+          <div className="pair">
+            <button className="missed" onClick={() => onMark(false)}>
+              <span className="icon" aria-hidden="true">
+                ✗
+              </span>
+              Missed it
+            </button>
+            <button className="got" onClick={() => onMark(true)}>
+              <span className="icon" aria-hidden="true">
+                ✓
+              </span>
+              Got it
+            </button>
+          </div>
+        )}
+      </div>
     </main>
   )
 }

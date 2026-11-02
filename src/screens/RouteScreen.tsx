@@ -25,21 +25,25 @@ export default function RouteScreen({ personCount, onDepartment, onGeneral, onNe
 
   return (
     <main className="screen">
-      <div className="topbar">
+      <header className="topbar">
         <p className="meta">People this shoot: {personCount}</p>
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen}>
           Menu
         </button>
-      </div>
+      </header>
       {menuOpen && (
         <div className="menu">
           <button onClick={newShoot}>New shoot</button>
         </div>
       )}
-      <h1>Choose a route</h1>
-      <div className="buttons">
-        <button onClick={onDepartment}>Department</button>
-        <button onClick={onGeneral} disabled={generalNotReady !== null}>
+      <div className="content">
+        <h1>Choose a route</h1>
+      </div>
+      <div className="actions">
+        <button className="primary" onClick={onDepartment}>
+          Department
+        </button>
+        <button className="primary" onClick={onGeneral} disabled={generalNotReady !== null}>
           General
           {generalNotReady && <span className="sub">{generalNotReady}</span>}
         </button>
