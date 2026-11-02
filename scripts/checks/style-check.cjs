@@ -34,7 +34,7 @@ async function audit(p, label) {
     const small = []
     for (const btn of document.querySelectorAll('button')) {
       const h = btn.getBoundingClientRect().height
-      const min = btn.classList.contains('end') ? 44 : 56
+      const min = btn.closest('.topbar') ? 44 : 56
       if (h < min - 0.5) small.push(`${btn.textContent.trim()} ${h}px`)
       if (btn.scrollWidth > btn.clientWidth + 1) problems.push(`button "${btn.textContent.trim()}" text overflows`)
     }
@@ -51,8 +51,19 @@ async function audit(p, label) {
     }
     const weights = [...document.querySelectorAll('button, h1, p, li, span')].map((e) => Number(getComputedStyle(e).fontWeight))
     const banned = /route|shoot/i.test(document.body.innerText)
-    return { problems, small, low, minWeight: Math.min(...weights), banned }
+    // Top-bar pill outlines must reach 3:1 against the page (non-text contrast)
+    const weakPills = [...document.querySelectorAll('.topbar button')].filter((btn) => {
+      const fg = lum(parse(getComputedStyle(btn).borderTopColor)), bg = lum(bgOf(btn.parentElement))
+      return (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05) < 3
+    }).map((b) => b.textContent.trim())
+    const fontOk = getComputedStyle(document.body).fontFamily.startsWith('Outfit') && [...document.fonts].some((f) => f.family.replace(/"/g, '') === 'Outfit' && f.status === 'loaded')
+    const dots = getComputedStyle(document.querySelector('main')).backgroundImage.includes('radial-gradient')
+    return { problems, small, low, minWeight: Math.min(...weights), banned, weakPills, fontOk, dots }
   })
+  ok(r.weakPills.length === 0, `${label}: pill outlines >= 3:1 ${r.weakPills.join(', ')}`)
+  ok(r.fontOk, `${label}: Outfit font loaded and in use`)
+  const wantDots = /route|score/.test(label)
+  ok(r.dots === wantDots, `${label}: dot grid ${wantDots ? 'shown' : 'not shown'}`)
   ok(!r.banned, `${label}: no "route"/"shoot" in text`)
   ok(r.problems.length === 0, `${label}: no overflow/cut-off ${r.problems.slice(0, 5).join('; ')}`)
   ok(r.small.length === 0, `${label}: tap targets ${r.small.join(', ')}`)
@@ -71,6 +82,7 @@ async function audit(p, label) {
     const btnStart = (n) => p.getByRole('button', { name: new RegExp('^' + n) })
     let n = 0
     const shot = async (name, opts = {}) => {
+      await p.evaluate(() => document.fonts.ready)
       await audit(p, `${size.name} ${name}`)
       await p.screenshot({ path: path.join(SHOTS, `${size.name}-${String(++n).padStart(2, '0')}-${name}.png`), ...opts })
     }
@@ -148,7 +160,7 @@ async function audit(p, label) {
       return { moving: moving.length, bg: getComputedStyle(document.body).backgroundColor, text: getComputedStyle(document.body).color }
     })
     ok(env.moving === 0, `${size.name}: no transitions/animations`)
-    ok(env.bg === 'rgb(255, 255, 255)' && env.text === 'rgb(13, 13, 13)', `${size.name}: stays light in dark mode (${env.bg})`)
+    ok(env.bg === 'rgb(255, 255, 255)' && env.text === 'rgb(17, 17, 17)', `${size.name}: stays light in dark mode (${env.bg})`)
     await p.emulateMedia({ reducedMotion: null, colorScheme: null })
     ok(errs.length === 0, `${size.name}: no page errors ${errs.join('; ')}`)
     await ctx.close()

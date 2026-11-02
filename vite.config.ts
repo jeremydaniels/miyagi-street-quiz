@@ -30,7 +30,7 @@ export default defineConfig({
       },
       workbox: {
         // Everything the app needs offline. Question files are bundled into the JS.
-        globPatterns: ['**/*.{html,js,css,png,svg}'],
+        globPatterns: ['**/*.{html,js,css,png,svg,woff2}'],
         // (the plugin adds manifest.webmanifest itself)
         cleanupOutdatedCaches: true,
         // A new version waits until the app is next opened fresh (or Reset questions applies it).

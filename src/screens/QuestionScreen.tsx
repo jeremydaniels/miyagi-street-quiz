@@ -1,4 +1,4 @@
-import { LEVEL_NAMES, SUBJECT_NAMES, countFor, type Question } from '../questions.ts'
+import { LEVELS, LEVEL_NAMES, SUBJECT_NAMES, countFor, type Question } from '../questions.ts'
 
 type Props = {
   question: Question
@@ -12,9 +12,9 @@ type Props = {
 export default function QuestionScreen({ question, number, onSwap, onMark, onBack, onEnd }: Props) {
   const canSwap = countFor(question.subject, question.level) > 1
 
-  let answersLabel: string | null = null
-  if (question.match === 'all') answersLabel = 'All of these'
-  else if (question.answers.length > 1) answersLabel = 'Any one of these'
+  let answersLabel = 'Answer'
+  if (question.match === 'all') answersLabel = 'Answer · all of these'
+  else if (question.answers.length > 1) answersLabel = 'Answer · any one of these'
 
   function endQuiz() {
     if (window.confirm('End this quiz?')) onEnd()
@@ -24,14 +24,20 @@ export default function QuestionScreen({ question, number, onSwap, onMark, onBac
     <main className="screen question-screen">
       <header className="topbar">
         {onBack && (
-          <button className="back" onClick={onBack}>
+          <button className="pill" onClick={onBack}>
             ← Back
           </button>
         )}
-        <button className="end" onClick={endQuiz}>
+        <button className="pill end push-right" onClick={endQuiz}>
           End quiz
         </button>
       </header>
+
+      <div className="progress-bar" aria-hidden="true">
+        {LEVELS.map((level, i) => (
+          <span key={level} className={i < number ? 'done' : undefined} />
+        ))}
+      </div>
 
       <div className="content">
         <p className="meta progress">
@@ -43,12 +49,12 @@ export default function QuestionScreen({ question, number, onSwap, onMark, onBac
         </p>
         <p className="question">{question.q}</p>
 
-        <button onClick={onSwap} disabled={!canSwap}>
+        <button className="compact" onClick={onSwap} disabled={!canSwap}>
           Swap question
         </button>
 
         <section className="answer">
-          {answersLabel && <p className="answer-label">{answersLabel}</p>}
+          <p className="answer-label">{answersLabel}</p>
           <ul>
             {question.answers.map((a) => (
               <li key={a}>{a}</li>

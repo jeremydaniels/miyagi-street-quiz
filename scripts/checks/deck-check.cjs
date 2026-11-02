@@ -30,7 +30,7 @@ const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...
 
   console.log('-- 1. not-ready subjects hidden; single-question Swap disabled')
   await btn('By department').click(); await btn('Science').click()
-  const shown = (await p.locator('.actions button').allTextContents()).map((t) => t.trim())
+  const shown = (await p.locator('.buttons button').allTextContents()).map((t) => t.trim())
   ok(JSON.stringify(shown) === JSON.stringify(['Chemistry', 'Biology']), `Science shows only ready subjects: ${shown} (Physics, with no hard questions, hidden)`)
   ok((await p.getByText(/questions yet/i).count()) === 0 && (await p.locator('button:disabled').count()) === 0, 'no disabled subjects or "questions yet" labels')
   await btn('Chemistry').click()
@@ -128,7 +128,7 @@ const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...
   console.log('-- 6. Reset questions')
   await setSaved({ decks: { 'general:easy': { order: GEN_E, next: 2, last: 'gen-e-002' } } })
   const menu = btn('Menu')
-  ok((await menu.boundingBox()).height >= 56, 'Menu button >= 56px')
+  ok((await menu.boundingBox()).height >= 44, 'Menu pill >= 44px (top-bar exception)')
   await menu.click()
   ok((await btn('Reset questions').boundingBox()).height >= 56, 'Reset questions >= 56px')
   let msg = ''

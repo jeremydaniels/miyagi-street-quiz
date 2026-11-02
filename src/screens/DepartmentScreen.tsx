@@ -1,3 +1,4 @@
+import Logo from '../Logo.tsx'
 import { DEPARTMENT_NAMES, readyDepartments, type Department } from '../questions.ts'
 
 type Props = {
@@ -9,19 +10,20 @@ export default function DepartmentScreen({ onPick, onBack }: Props) {
   return (
     <main className="screen">
       <header className="topbar">
-        <button className="back" onClick={onBack}>
+        <button className="pill" onClick={onBack}>
           ← Back
         </button>
+        <Logo />
       </header>
-      <div className="content">
-        <h1>Department</h1>
-      </div>
-      <div className="actions">
-        {readyDepartments().map((d) => (
-          <button key={d} onClick={() => onPick(d)}>
-            {DEPARTMENT_NAMES[d]}
-          </button>
-        ))}
+      <div className="bottom-group">
+        <h1>Which department?</h1>
+        <div className="buttons">
+          {readyDepartments().map((d) => (
+            <button key={d} onClick={() => onPick(d)}>
+              {DEPARTMENT_NAMES[d]}
+            </button>
+          ))}
+        </div>
       </div>
     </main>
   )

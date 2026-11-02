@@ -1,43 +1,67 @@
 /* ==========================================================================
-   Design tokens. Branding is swapped in by changing only this block.
-   Light theme only: the app is used outdoors in bright sunlight.
+   Font: Outfit (SIL Open Font License, see assets/fonts/OFL.txt), self-hosted
+   so it works offline. One variable file covers weights 600–800.
+   ========================================================================== */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./assets/fonts/Outfit-Variable.woff2') format('woff2');
+}
+
+/* ==========================================================================
+   Design tokens: Miyagi Labs. Light theme only (used outdoors in sunlight).
+   Every text/background pair here reaches at least 7:1 contrast.
    ========================================================================== */
 :root {
   color-scheme: light;
 
-  /* Colours (placeholders until Miyagi branding) */
+  /* Colours */
   --color-bg: #ffffff;
-  --color-text: #0d0d0d;
-  --color-border: #0d0d0d;
-  --color-pressed: #dcdcdc;
-  --color-accent: #1e3a8a;
-  --color-accent-pressed: #142863;
-  --color-on-accent: #ffffff;
-  --color-success: #0a5c24;
-  --color-success-pressed: #063d18;
-  --color-danger: #a1170f;
-  --color-danger-pressed: #74100a;
-  --color-on-status: #ffffff;
-  --color-disabled-bg: #e6e6e6;
-  --color-disabled-text: #3d3d3d;
+  --color-text: #111111;
+  --color-text-secondary: #404040;
+  --color-border: #d4d4d4;
+  --color-divider: #e5e5e5;
+  --color-pill-border: #8a8a8a; /* 3.45:1 on white, so pill outlines show outdoors */
+  --color-outline: #111111; /* 2px outline on white buttons */
+  --color-pressed: #ededed;
+  --color-brand: #f97316;
+  --color-brand-pressed: #ea580c;
+  --color-on-brand: #000000; /* 7.49:1 on brand orange */
+  --color-kicker: #9a3412; /* department name on Subject, 7.31:1 on white */
+  --color-tag-bg: #ffedd5;
+  --color-tag-text: #7c2d12; /* 8.18:1 on tag background */
+  --color-success: #166534; /* Got it, 7.13:1 with white text */
+  --color-success-pressed: #14532d;
+  --color-on-success: #ffffff;
+  --color-missed-mark: #111111; /* ✗ circle on the score screen */
+  --color-answer-bg: #f5f5f4;
+  --color-progress-done: #f97316;
+  --color-progress-upcoming: #e5e5e5;
+  --color-dot: #e7e7e7;
+  --color-disabled-bg: #f5f5f4;
+  --color-disabled-text: #404040;
   --color-focus: #000000;
 
   /* Type */
-  --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family: 'Outfit', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-weight-normal: 600;
-  --font-weight-bold: 800;
-  --font-weight-black: 900;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
   --font-size-base: 1.125rem;
   --font-size-small: 1rem;
   --font-size-label: 0.95rem;
   --font-size-button: 1.3rem;
-  --font-size-heading: 1.75rem;
-  --font-size-meta: 1.15rem;
+  --font-size-heading: 1.9rem;
+  --font-size-kicker: 1rem;
+  --font-size-meta: 1.1rem;
+  --font-size-brand: 1.15rem;
   --font-size-question: clamp(2rem, 8.5vw, 2.6rem);
   --font-size-answer: 1.4rem;
   --font-size-score: clamp(6rem, 32vw, 9rem);
   --line-height: 1.35;
-  --line-height-tight: 1.2;
+  --line-height-tight: 1.15;
 
   /* Spacing and shape */
   --space-1: 4px;
@@ -45,14 +69,24 @@
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 24px;
+  --space-heading: 28px; /* between a screen's heading and its buttons */
   --space-6: 32px;
-  --radius: 12px;
-  --border-width: 3px;
+  --radius-large: 18px;
+  --radius-pill: 999px;
+  --radius-tag: 8px;
+  --border-width: 2px;
+  --pill-border-width: 1.5px;
   --focus-width: 4px;
   --tap-min: 56px;
-  --tap-small: 44px; /* End quiz only: deliberate exception, see CLAUDE.md */
+  --tap-pill: 44px; /* top-bar pills only: deliberate exception, see CLAUDE.md */
   --tap-mark: 64px;
+  --logo-small: 36px; /* the mark itself shows at about 30px (the image has padding) */
+  --logo-large: 67px; /* mark shows at about 56px */
+  --progress-height: 6px;
+  --dot-size: 1.2px;
+  --dot-spacing: 18px;
   --max-width: 520px;
+  --gutter: max(var(--space-4), calc((100vw - var(--max-width)) / 2));
 }
 
 /* ==========================================================================
@@ -90,17 +124,23 @@ p {
 }
 
 /* ==========================================================================
-   Screen layout: top bar, content, then main buttons at the bottom (thumb zone)
+   Screen layout. Content sits in a centred column; the main buttons are at
+   the bottom (thumb zone).
    ========================================================================== */
 .screen {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  max-width: var(--max-width);
   min-height: 100vh;
   min-height: 100dvh;
-  margin: 0 auto;
-  padding: var(--space-4) var(--space-4) 0;
+  padding: var(--space-4) var(--gutter) 0;
+}
+
+/* Faint dot grid: question-type and score screens only */
+.screen.dots {
+  background-color: var(--color-bg);
+  background-image: radial-gradient(circle, var(--color-dot) var(--dot-size), transparent calc(var(--dot-size) + 0.3px));
+  background-size: var(--dot-spacing) var(--dot-spacing);
 }
 
 .topbar {
@@ -108,7 +148,27 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: var(--tap-min);
+  min-height: var(--tap-pill);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-brand);
+  font-weight: var(--font-weight-black);
+}
+
+.logo {
+  display: block;
+  flex: none;
+  width: var(--logo-small);
+  height: var(--logo-small);
+}
+
+.logo-large {
+  width: var(--logo-large);
+  height: var(--logo-large);
 }
 
 .content {
@@ -116,6 +176,38 @@ p {
   flex: 1;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+/* Heading grouped directly above its buttons, at the bottom of the screen */
+.bottom-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-heading);
+  margin-top: auto;
+  padding-bottom: max(var(--space-5), env(safe-area-inset-bottom));
+}
+
+.heading-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.kicker {
+  font-size: var(--font-size-kicker);
+  font-weight: var(--font-weight-black);
+  color: var(--color-kicker);
+}
+
+.message {
+  font-size: var(--font-size-answer);
+  font-weight: var(--font-weight-bold);
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .actions {
@@ -129,10 +221,10 @@ p {
 .actions.sticky {
   position: sticky;
   bottom: 0;
-  margin: 0 calc(-1 * var(--space-4));
-  padding: var(--space-3) var(--space-4) max(var(--space-5), env(safe-area-inset-bottom));
+  margin: 0 calc(-1 * var(--gutter));
+  padding: var(--space-3) var(--gutter) max(var(--space-5), env(safe-area-inset-bottom));
   background: var(--color-bg);
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: 1px solid var(--color-divider);
 }
 
 .pair {
@@ -146,9 +238,9 @@ p {
    ========================================================================== */
 button {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--space-2);
   width: 100%;
   min-height: var(--tap-min);
   margin: 0;
@@ -159,8 +251,8 @@ button {
   line-height: var(--line-height-tight);
   color: var(--color-text);
   background: var(--color-bg);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius);
+  border: var(--border-width) solid var(--color-outline);
+  border-radius: var(--radius-large);
   cursor: pointer;
   touch-action: manipulation;
   user-select: none;
@@ -180,79 +272,96 @@ button:disabled {
   color: var(--color-disabled-text);
   background: var(--color-disabled-bg);
   border-style: dashed;
-  border-color: var(--color-disabled-text);
+  border-color: var(--color-pill-border);
   cursor: default;
 }
 
 button.primary {
-  color: var(--color-on-accent);
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  color: var(--color-on-brand);
+  background: var(--color-brand);
+  border-color: var(--color-brand);
 }
 
 button.primary:active {
-  background: var(--color-accent-pressed);
+  background: var(--color-brand-pressed);
+  border-color: var(--color-brand-pressed);
+}
+
+/* Small outlined button sized to its text (Swap question). Still 56px tall. */
+button.compact {
+  width: auto;
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--font-size-small);
 }
 
 button.got,
 button.missed {
-  flex-direction: row;
-  gap: var(--space-2);
   min-height: var(--tap-mark);
-  color: var(--color-on-status);
 }
 
 button.got {
+  color: var(--color-on-success);
   background: var(--color-success);
   border-color: var(--color-success);
 }
 
 button.got:active {
   background: var(--color-success-pressed);
+  border-color: var(--color-success-pressed);
 }
 
 button.missed {
-  background: var(--color-danger);
-  border-color: var(--color-danger);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border-color: var(--color-outline);
 }
 
-button.missed:active {
-  background: var(--color-danger-pressed);
-}
-
-button.got .icon,
-button.missed .icon {
+button .icon {
   font-size: 1.4em;
   line-height: 1;
 }
 
-/* Small buttons in the top bar */
-button.back,
-button.menu-toggle {
+/* Top-bar pills (Back, Menu, End quiz): 44px, away from the thumb zone. */
+button.pill {
   width: auto;
+  min-height: var(--tap-pill);
+  padding: var(--space-1) var(--space-4);
   font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  border-width: var(--pill-border-width);
+  border-color: var(--color-pill-border);
+  border-radius: var(--radius-pill);
 }
 
-/* End quiz: small and in the top corner, far from the thumb, so it isn't hit by accident. */
-button.end {
-  width: auto;
-  min-height: var(--tap-small);
+.topbar .push-right {
   margin-left: auto;
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-label);
-  border-width: 2px;
+}
+
+.menu {
+  padding: var(--space-3);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
 }
 
 /* ==========================================================================
-   Start screen
+   Question screen
    ========================================================================== */
-button.menu-toggle {
-  margin-left: auto;
+.progress-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-1);
 }
 
-.message {
-  font-size: var(--font-size-answer);
-  font-weight: var(--font-weight-bold);
+.progress-bar span {
+  height: var(--progress-height);
+  background: var(--color-progress-upcoming);
+  border-radius: var(--radius-pill);
+}
+
+.progress-bar span.done {
+  background: var(--color-progress-done);
 }
 
 .meta {
@@ -260,15 +369,6 @@ button.menu-toggle {
   font-weight: var(--font-weight-bold);
 }
 
-.menu {
-  padding: var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius);
-}
-
-/* ==========================================================================
-   Question screen
-   ========================================================================== */
 .progress {
   display: flex;
   flex-wrap: wrap;
@@ -278,9 +378,9 @@ button.menu-toggle {
 
 .progress .level {
   padding: var(--space-1) var(--space-3);
-  color: var(--color-on-accent);
-  background: var(--color-accent);
-  border-radius: var(--radius);
+  color: var(--color-tag-text);
+  background: var(--color-tag-bg);
+  border-radius: var(--radius-tag);
   white-space: nowrap;
 }
 
@@ -300,15 +400,14 @@ button.menu-toggle {
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius);
+  background: var(--color-answer-bg);
+  border-radius: var(--radius-large);
 }
 
 .answer-label {
   font-size: var(--font-size-label);
-  font-weight: var(--font-weight-black);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
 }
 
 .answer ul {
@@ -326,7 +425,8 @@ button.menu-toggle {
 .note {
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-base);
-  border-left: calc(var(--border-width) * 2) solid var(--color-accent);
+  color: var(--color-text-secondary);
+  border-left: 4px solid var(--color-brand);
 }
 
 /* Room so the last line of content clears the sticky buttons */
@@ -341,14 +441,14 @@ button.menu-toggle {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-4) 0;
+  gap: var(--space-2);
+  padding: var(--space-4) 0 var(--space-2);
 }
 
-.score-label {
+.score-subject {
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-black);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--color-text-secondary);
 }
 
 .score {
@@ -361,19 +461,26 @@ button.menu-toggle {
 .recap {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
 }
 
 .recap li {
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   overflow-wrap: anywhere;
+}
+
+.recap li + li {
+  border-top: 1px solid var(--color-divider);
 }
 
 .recap .mark {
@@ -385,7 +492,7 @@ button.menu-toggle {
   height: 2.25rem;
   font-size: 1.3rem;
   font-weight: var(--font-weight-black);
-  color: var(--color-on-status);
+  color: var(--color-on-success);
   border-radius: 50%;
 }
 
@@ -394,7 +501,7 @@ button.menu-toggle {
 }
 
 .recap .mark.missed {
-  background: var(--color-danger);
+  background: var(--color-missed-mark);
 }
 
 /* ==========================================================================

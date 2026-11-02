@@ -10,7 +10,7 @@ The person using the app is the interviewer, not the student.
 
 ### 1. Route
 
-Heading: "What kind of questions?". Two big buttons: **By department** and **General**.
+Heading: "What kind of questions?". Two big buttons: **By department** (the orange primary button) and **General**. The top bar shows the Miyagi mark with "Street Quiz" on the left.
 
 Also on this screen: a menu with **Reset questions** (see Deck logic).
 
@@ -18,11 +18,11 @@ The app's text never uses the word "route"; it's only the name used in these doc
 
 ### 2. Department (Department route only)
 
-Three buttons: **Science**, **Commercial**, **Art**. Back goes to Route.
+Heading: "Which department?". Three buttons: **Science**, **Commercial**, **Art**. Back goes to Route.
 
 ### 3. Subject (Department route only)
 
-Shows the ready subjects for the chosen department (see below). Back goes to Department.
+The department name (small, in orange) above the heading "Best subject?", then the ready subjects for that department (see below). Back goes to Department.
 
 | Department | Subjects |
 |---|---|
@@ -46,12 +46,12 @@ Only ready subjects are shown:
 
 Always three questions, in order: **Easy**, **Medium**, **Hard**. Each screen shows, top to bottom:
 
-- The level and progress (e.g. "Easy · 1 of 3") and the subject name
+- A thin three-part progress bar, then the level and progress as a tag (e.g. "Easy · 1 of 3") and the subject name
 - The question, in large text
 - **Swap question**, directly under the question: draws the next question from the same deck. For when the student or the crowd has already heard it. Available until the question is marked.
 - The answer section, shown straight away (there's no separate reveal step):
-  - If `match` is `"one"` and there's more than one answer, label the list "Any one of these".
-  - If `match` is `"all"`, label it "All of these".
+  - Label it "Answer". If `match` is `"one"` and there's more than one answer, label it "Answer · any one of these".
+  - If `match` is `"all"`, label it "Answer · all of these".
   - Show `note` if present (guidance for the interviewer).
 - Two buttons in a bar fixed to the bottom of the screen: **Missed it** and **Got it**. Tapping either moves to the next question. There's no going back after marking. If the question and answers don't fit, the content scrolls and the bar stays put.
 
@@ -61,7 +61,7 @@ Every question screen also has a small **End quiz** button, kept apart from the 
 
 ### 5. Score
 
-- Big score, e.g. **2/3**
+- The Miyagi mark, the subject name and a big score, e.g. **2/3**
 - A short recap of the three questions with a tick or cross
 - **Next person**: returns to Route
 

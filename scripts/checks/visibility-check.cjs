@@ -23,11 +23,11 @@ const server = http.createServer((req, res) => {
     const errs = []; p.on('pageerror', (e) => errs.push(e.message))
     const btn = (n) => p.getByRole('button', { name: n, exact: true })
     await p.goto(URL)
-    const startButtons = (await p.locator('.actions button').allTextContents()).map((t) => t.trim())
+    const startButtons = (await p.locator('.buttons button').allTextContents()).map((t) => t.trim())
     if (variant === 'B') {
       ok(JSON.stringify(startButtons) === '["By department"]', `${size.name}: General hidden (${startButtons})`)
       await btn('By department').click()
-      const depts = (await p.locator('.actions button').allTextContents()).map((t) => t.trim())
+      const depts = (await p.locator('.buttons button').allTextContents()).map((t) => t.trim())
       ok(JSON.stringify(depts) === '["Science","Commercial"]', `${size.name}: Art hidden, no ready subjects (${depts})`)
     } else {
       ok(startButtons.length === 0, `${size.name}: no By department / General buttons (${startButtons})`)

@@ -32,9 +32,10 @@ A phone app (PWA) used by an interviewer during street quizzes with JAMB student
 
 - Phone-first and one-handed: the interviewer holds the phone while talking to someone.
 - Large tap targets (at least 56px tall) and large question text.
-- End quiz is a deliberate exception to the 56px rule: it's 44px tall and set apart from the main buttons so it's hard to tap by accident.
+- Top-bar pills (Back, Menu and End quiz) are a deliberate exception to the 56px rule: they're 44px tall and sit in the top bar, away from the thumb zone and the main buttons, so they're hard to tap by accident.
 - High contrast, readable in bright sunlight.
 - Must work fully offline once installed.
 - Updates download in the background and wait. A new version takes effect only when the app is next opened fresh, or when Reset questions is confirmed (after the reset is saved). Nothing else may ever reload the app: no update popups, no reload mid-quiz. See `src/pwa.ts`.
-- App icons are placeholders in `public/icons/`. To rebrand, replace the files with new ones of the same names and sizes: `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (keep the design inside the middle 80%), `apple-touch-icon.png` (180×180, no transparency) and `favicon.svg`.
+- Branding: colours, type, spacing and radii are CSS variables at the top of `src/index.css` (every text colour pair there reaches 7:1). The font is Outfit, self-hosted in `src/assets/fonts/` (variable `woff2`, SIL Open Font License in `OFL.txt`). The Miyagi mark is `src/assets/miyagi-mark.png`.
+- App icons in `public/icons/` are the Miyagi mark centred on white. To change them, replace the files with new ones of the same names and sizes: `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (keep the design inside the middle 80%), `apple-touch-icon.png` (180×180, no transparency) and `favicon.svg`.
 - Every screen needs a clear way back, except after a question has been marked.
