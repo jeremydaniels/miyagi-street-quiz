@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { LEVELS, pickRandom, type Department, type Question } from './questions.ts'
+import { LEVELS, type Department, type Question } from './questions.ts'
+import { draw, newShoot, savePersonCount, savedPersonCount } from './decks.ts'
 import RouteScreen from './screens/RouteScreen.tsx'
 import DepartmentScreen from './screens/DepartmentScreen.tsx'
 import SubjectScreen from './screens/SubjectScreen.tsx'
@@ -15,10 +16,10 @@ type Screen =
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'route' })
-  const [personCount, setPersonCount] = useState(0)
+  const [personCount, setPersonCount] = useState(savedPersonCount)
 
   function startQuiz(subject: string, department: Department | null) {
-    setScreen({ name: 'question', department, question: pickRandom(subject, 'easy'), results: [] })
+    setScreen({ name: 'question', department, question: draw(subject, 'easy'), results: [] })
   }
 
   switch (screen.name) {
@@ -28,6 +29,10 @@ export default function App() {
           personCount={personCount}
           onDepartment={() => setScreen({ name: 'department' })}
           onGeneral={() => startQuiz('general', null)}
+          onNewShoot={() => {
+            newShoot()
+            setPersonCount(0)
+          }}
         />
       )
 
@@ -63,14 +68,14 @@ export default function App() {
           number={results.length + 1}
           onBack={onBack}
           onSwap={() =>
-            setScreen({ ...screen, question: pickRandom(question.subject, question.level, question.id) })
+            setScreen({ ...screen, question: draw(question.subject, question.level) })
           }
           onMark={(gotIt) => {
             const nextResults = [...results, { question, gotIt }]
             const nextLevel = LEVELS[nextResults.length]
             setScreen(
               nextLevel
-                ? { ...screen, question: pickRandom(question.subject, nextLevel), results: nextResults }
+                ? { ...screen, question: draw(question.subject, nextLevel), results: nextResults }
                 : { name: 'score', results: nextResults },
             )
           }}
@@ -84,7 +89,9 @@ export default function App() {
         <ScoreScreen
           results={screen.results}
           onNextPerson={() => {
-            setPersonCount((n) => n + 1)
+            const next = personCount + 1
+            savePersonCount(next)
+            setPersonCount(next)
             setScreen({ name: 'route' })
           }}
         />

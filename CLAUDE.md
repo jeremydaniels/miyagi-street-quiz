@@ -31,6 +31,7 @@ A phone app (PWA) used by an interviewer during street quizzes with JAMB student
 
 - Phone-first and one-handed: the interviewer holds the phone while talking to someone.
 - Large tap targets (at least 56px tall) and large question text.
+- End quiz is a deliberate exception to the 56px rule: it's 44px tall and set apart from the main buttons so it's hard to tap by accident.
 - High contrast, readable in bright sunlight.
 - Must work fully offline once installed.
 - Every screen needs a clear way back, except after a question has been marked.

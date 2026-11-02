@@ -58,7 +58,7 @@ const files = import.meta.glob<Question[]>('../data/questions/*.json', {
 
 const allQuestions: Question[] = Object.values(files).flat()
 
-function questionsFor(subject: string, level: Level): Question[] {
+export function questionsFor(subject: string, level: Level): Question[] {
   return allQuestions.filter((q) => q.subject === subject && q.level === level)
 }
 
@@ -80,11 +80,4 @@ export function notReadyLabel(subject: string): string | null {
   const list =
     names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}`
   return `No ${list} questions yet`
-}
-
-// A random question for this subject and level, avoiding excludeId when there's another choice.
-export function pickRandom(subject: string, level: Level, excludeId?: string): Question {
-  const pool = questionsFor(subject, level)
-  const choices = pool.length > 1 ? pool.filter((q) => q.id !== excludeId) : pool
-  return choices[Math.floor(Math.random() * choices.length)]
 }
