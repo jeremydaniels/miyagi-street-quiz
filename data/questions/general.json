@@ -1,0 +1,13 @@
+[
+  {"id": "gen-e-001", "subject": "general", "level": "easy", "q": "What is the capital of Nigeria?", "answers": ["Abuja"], "match": "one"},
+  {"id": "gen-e-002", "subject": "general", "level": "easy", "q": "What are the colours of the Nigerian flag?", "answers": ["Green, white, green"], "match": "one", "note": "'Green and white' is right."},
+  {"id": "gen-e-003", "subject": "general", "level": "easy", "q": "What is the process by which plants make their food?", "answers": ["Photosynthesis"], "match": "one"},
+  {"id": "gen-e-004", "subject": "general", "level": "easy", "q": "What is the plural of \"child\"?", "answers": ["Children"], "match": "one"},
+  {"id": "gen-m-001", "subject": "general", "level": "medium", "q": "Who was Nigeria's first president?", "answers": ["Nnamdi Azikiwe"], "match": "one", "note": "Accept 'Zik' or 'Azikiwe'."},
+  {"id": "gen-m-002", "subject": "general", "level": "medium", "q": "Which is the longest river in Nigeria?", "answers": ["River Niger"], "match": "one"},
+  {"id": "gen-m-003", "subject": "general", "level": "medium", "q": "At what temperature does water boil?", "answers": ["100°C"], "match": "one", "note": "Accept '100 degrees'."},
+  {"id": "gen-m-004", "subject": "general", "level": "medium", "q": "What is the square root of 144?", "answers": ["12"], "match": "one"},
+  {"id": "gen-h-001", "subject": "general", "level": "hard", "q": "How many bones are in the adult human body?", "answers": ["206"], "match": "one"},
+  {"id": "gen-h-002", "subject": "general", "level": "hard", "q": "Which is the largest planet in the solar system?", "answers": ["Jupiter"], "match": "one"},
+  {"id": "gen-h-003", "subject": "general", "level": "hard", "q": "Who designed the Nigerian flag?", "answers": ["Taiwo Akinkunmi"], "match": "one", "note": "Accept 'Akinkunmi'."}
+]

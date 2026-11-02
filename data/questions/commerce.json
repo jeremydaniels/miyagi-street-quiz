@@ -1,0 +1,8 @@
+[
+  {"id": "com-e-001", "subject": "commerce", "level": "easy", "q": "What is the oldest form of trade?", "answers": ["Trade by barter"], "match": "one"},
+  {"id": "com-e-002", "subject": "commerce", "level": "easy", "q": "What does CBN stand for?", "answers": ["Central Bank of Nigeria"], "match": "one"},
+  {"id": "com-m-001", "subject": "commerce", "level": "medium", "q": "What are the three types of occupation?", "answers": ["Industrial", "Commercial", "Services"], "match": "all"},
+  {"id": "com-m-002", "subject": "commerce", "level": "medium", "q": "What do we call someone who buys goods for their own use?", "answers": ["Consumer"], "match": "one"},
+  {"id": "com-h-001", "subject": "commerce", "level": "hard", "q": "Mention one problem of trade by barter.", "answers": ["Double coincidence of wants", "No common measure of value", "Some goods can't be divided", "Hard to store wealth, because goods spoil", "No standard for deferred payment", "Bulky goods are hard to carry around"], "match": "one"},
+  {"id": "com-h-002", "subject": "commerce", "level": "hard", "q": "Mention one function of the Central Bank.", "answers": ["Issues currency (notes and coins)", "Banker to the government", "Banker to commercial banks", "Lender of last resort", "Controls money supply", "Manages foreign reserves and exchange", "Supervises and regulates banks", "Acts as a clearing house", "Manages the public debt", "Advises the government on financial matters"], "match": "one", "note": "Close wording counts, e.g. 'printing money' for issuing currency."}
+]

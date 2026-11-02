@@ -1,0 +1,8 @@
+[
+  {"id": "gov-e-001", "subject": "government", "level": "easy", "q": "How many states are in Nigeria?", "answers": ["36"], "match": "one"},
+  {"id": "gov-e-002", "subject": "government", "level": "easy", "q": "In what year did Nigeria gain independence?", "answers": ["1960"], "match": "one"},
+  {"id": "gov-m-001", "subject": "government", "level": "medium", "q": "What are the three arms of government?", "answers": ["Legislature", "Executive", "Judiciary"], "match": "all"},
+  {"id": "gov-m-002", "subject": "government", "level": "medium", "q": "How many local government areas are in Nigeria?", "answers": ["774"], "match": "one"},
+  {"id": "gov-h-001", "subject": "government", "level": "hard", "q": "Who was Nigeria's first Prime Minister?", "answers": ["Sir Abubakar Tafawa Balewa"], "match": "one", "note": "Accept 'Tafawa Balewa'."},
+  {"id": "gov-h-002", "subject": "government", "level": "hard", "q": "In what year did Nigeria become a republic?", "answers": ["1963"], "match": "one"}
+]
