@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { LEVELS, type Department, type Question } from './questions.ts'
 import { draw, newShoot, savePersonCount, savedPersonCount } from './decks.ts'
+import { applyWaitingUpdate } from './pwa.ts'
 import RouteScreen from './screens/RouteScreen.tsx'
 import DepartmentScreen from './screens/DepartmentScreen.tsx'
 import SubjectScreen from './screens/SubjectScreen.tsx'
@@ -32,6 +33,8 @@ export default function App() {
           onNewShoot={() => {
             newShoot()
             setPersonCount(0)
+            // Decks and count are already saved, so this is the one safe moment to switch versions.
+            applyWaitingUpdate()
           }}
         />
       )
