@@ -19,7 +19,7 @@
   {"id": "irs-m-008", "subject": "irs", "level": "medium", "q": "What do we call the compulsory giving of alms in Islam?", "answers": ["Zakat"], "match": "one"},
   {"id": "irs-m-009", "subject": "irs", "level": "medium", "q": "Who was the first wife of Prophet Muhammad (SAW)?", "answers": ["Khadijah"], "match": "one"},
   {"id": "irs-m-010", "subject": "irs", "level": "medium", "q": "What is the festival at the end of Ramadan called?", "answers": ["Eid al-Fitr"], "match": "one", "note": "Accept 'Id el-Fitr' or 'Sallah'."},
-  {"id": "irs-h-001", "subject": "irs", "level": "hard", "q": "Which surah is known as the heart of the Qur'an?", "answers": ["Suratu Yasin"], "match": "one", "note": "Accept 'Yasin'."},
+  {"id": "irs-h-001", "subject": "irs", "level": "hard", "q": "Who was the fourth caliph?", "answers": ["Ali ibn Abi Talib"], "match": "one", "note": "Accept 'Ali'."},
   {"id": "irs-h-002", "subject": "irs", "level": "hard", "q": "What is the longest surah in the Qur'an?", "answers": ["Suratul Baqarah"], "match": "one", "note": "Accept 'Al-Baqarah'."},
   {"id": "irs-h-003", "subject": "irs", "level": "hard", "q": "Who was the second caliph?", "answers": ["Umar ibn al-Khattab"], "match": "one", "note": "Accept 'Umar'."},
   {"id": "irs-h-004", "subject": "irs", "level": "hard", "q": "Under which caliph was the standard copy of the Qur'an made and sent to the provinces?", "answers": ["Uthman ibn Affan"], "match": "one", "note": "Accept 'Uthman'."},

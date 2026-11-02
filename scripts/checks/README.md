@@ -6,6 +6,10 @@ exit code on failure).
 
 They are **not** part of the build, `npm run build`, or the Vercel deploy. Run them by hand.
 
+**They never create, change or delete anything in `data/questions/`.** They only read it. Checks
+that need incomplete, missing or changed questions use test builds made by `test-build.cjs` in a
+temporary copy of the repo (see below), which is deleted afterwards.
+
 ## What you need
 
 - **Node.js** (the same one used for the app).
@@ -23,19 +27,42 @@ They are **not** part of the build, `npm run build`, or the Vercel deploy. Run t
 
 All commands below are run from the repo root.
 
-## The five checks
+## The files
 
-| Script | What it checks | Needs |
+| File | What it is |
+|---|---|
+| `flow-check.cjs` | The whole flow on the real questions: start screen, every department's full subject list, answers shown straight away, Swap position and behaviour, "Answer" labels, notes, progress bar, Back rules, End quiz text and position, score and recap, Next person. |
+| `style-check.cjs` | Screenshots of every screen at Android 412×915 and iPhone SE 375×667, plus: no overflow or cut-off text (including the longest question and the longest answer list in the bank), last answer clears the bottom bar, buttons ≥ 56px (top-bar pills 44px), text contrast ≥ 7:1, pill outlines ≥ 3:1, no thin text, Outfit font in use, dot grid only where it belongs, visible focus, no animation, stays light in dark mode, no "route"/"shoot" in any text. |
+| `deck-check.cjs` | Deck logic and saved data: a subject missing a level is hidden, Swap disabled when a level has one question, every card shown before a repeat (made-up 4-card and 2-card decks, and the real 10-card General easy deck), no repeat across a reshuffle, decks survive a reload, new ids join the round, old/broken/stale saved data, Reset questions, blocked storage. |
+| `visibility-check.cjs` | Hiding rules: a department with no ready subjects and General hidden (variant B); nothing ready shows "There are no questions yet." (variant C). |
+| `pwa-check.cjs` | Installable (Chrome's own checks, iOS tags), works fully offline after one load (including font and logo), updates download quietly with no reload, a fresh open runs the new version, Reset questions applies a waiting update. |
+| `test-build.cjs` | Makes the test builds the last three checks need. |
+| `lib.cjs` | Helpers shared by the checks (reading questions, opening a specific question, a tiny static server). |
+
+The flow and style checks open specific questions by setting the saved deck order before starting a
+quiz, so they don't depend on which card happens to come up.
+
+## Test builds (`test-build.cjs`)
+
+```sh
+node scripts/checks/test-build.cjs <variant> <out folder>
+```
+
+It copies the repo to a temporary folder (linking `node_modules`), changes **only that copy**, runs
+the question check and the Vite build there, copies `dist/` to the out folder and deletes the copy.
+The out folder must be outside the repo.
+
+| Variant | What's different in the copy | Used by |
 |---|---|---|
-| `flow-check.cjs` | The whole flow on the real questions: start screen wording, departments and subjects shown, answers shown straight away, Swap position and behaviour, labels and notes, Back rules, End quiz text and position, score and recap, Next person. | Real build on `npm run preview` |
-| `style-check.cjs` | Screenshots of every screen at Android 412×915 and iPhone SE 375×667, plus: no overflow or cut-off text (including the longest question and the longest answer list), last answer clears the bottom bar, buttons ≥ 56px (End quiz 44px), text contrast ≥ 7:1, no thin text, visible focus, no animation, stays light in dark mode, no "route"/"shoot" in any text. | Real build on `npm run preview` |
-| `deck-check.cjs` | Deck logic and saved data: not-ready subjects hidden, Swap disabled for a single question, every card shown before a repeat, no repeat across a reshuffle, decks survive a reload, new ids join the round, old/broken/stale saved data, Reset questions, blocked storage. | Build **with the two test files below**, on `npm run preview` |
-| `visibility-check.cjs` | Hiding rules: a department with no ready subjects and General hidden (variant B); nothing ready shows "There are no questions yet." (variant C). | Two special builds, below. Serves them itself |
-| `pwa-check.cjs` | Installable (Chrome's own checks, iOS tags), works fully offline after one load, updates download quietly with no reload, a fresh open runs the new version, Reset questions applies a waiting update. | Two builds, v1 and v2, below. Serves them itself |
+| `real` | Nothing | `pwa-check` (v1) |
+| `updated` | The text of `gen-e-001` becomes "UPDATED: What is the capital of Nigeria?" | `pwa-check` (v2) |
+| `test-subjects` | Three made-up Science subjects are added (to `subjects.json`, the Science list and their own question files): **Test Deck** (4 easy, 4 medium, 2 hard), **Test Single** (1 per level, so Swap is disabled), **Test Partial** (no hard questions, so it must be hidden) | `deck-check` |
+| `some-missing` | Only `biology.json` and `commerce.json` are kept | `visibility-check` B |
+| `nothing-ready` | No real question files; only Test Partial | `visibility-check` C |
 
 ## Running them
 
-### Flow and style (real questions)
+### Flow and style (real build)
 
 ```sh
 npm run build
@@ -44,82 +71,34 @@ node scripts/checks/flow-check.cjs
 node scripts/checks/style-check.cjs   # screenshots go to scripts/checks/output/shots/
 ```
 
-### Deck check (temporary test questions)
-
-Add these two files to `data/questions/`, then build and preview as above and run
-`node scripts/checks/deck-check.cjs`. They give a subject with no hard questions (Physics, should
-be hidden) and a subject with one medium question (Chemistry, Swap disabled there).
-
-`data/questions/physics.json`
-
-```json
-[
-  {"id": "phy-e-001", "subject": "physics", "level": "easy", "q": "TEST physics easy 1", "answers": ["a"], "match": "one"},
-  {"id": "phy-e-002", "subject": "physics", "level": "easy", "q": "TEST physics easy 2", "answers": ["a"], "match": "one"},
-  {"id": "phy-e-003", "subject": "physics", "level": "easy", "q": "TEST physics easy 3", "answers": ["a"], "match": "one"},
-  {"id": "phy-m-001", "subject": "physics", "level": "medium", "q": "TEST physics medium 1", "answers": ["a"], "match": "one"}
-]
-```
-
-`data/questions/chemistry.json`
-
-```json
-[
-  {"id": "chm-e-001", "subject": "chemistry", "level": "easy", "q": "TEST chemistry easy 1", "answers": ["a"], "match": "one"},
-  {"id": "chm-e-002", "subject": "chemistry", "level": "easy", "q": "TEST chemistry easy 2", "answers": ["a"], "match": "one"},
-  {"id": "chm-e-003", "subject": "chemistry", "level": "easy", "q": "TEST chemistry easy 3", "answers": ["a"], "match": "one"},
-  {"id": "chm-m-001", "subject": "chemistry", "level": "medium", "q": "TEST chemistry medium 1", "answers": ["a"], "match": "one"},
-  {"id": "chm-h-001", "subject": "chemistry", "level": "hard", "q": "TEST chemistry hard 1", "answers": ["a"], "match": "one"},
-  {"id": "chm-h-002", "subject": "chemistry", "level": "hard", "q": "TEST chemistry hard 2", "answers": ["a"], "match": "one"}
-]
-```
-
-These assume Physics and Chemistry have no real questions yet. If they do, use two other
-Science subjects that don't, and adjust the names in the script.
-
-### Visibility check (two special builds)
-
-Each build is copied out of `dist/` before the next one replaces it.
-
-- **Variant B:** temporarily remove `government.json` and `general.json` from `data/questions/`,
-  run `npm run build`, copy `dist/` to e.g. `/tmp/varB`.
-- **Variant C:** temporarily leave only this one file in `data/questions/`, run `npm run build`,
-  copy `dist/` to e.g. `/tmp/varC`:
-
-  `data/questions/physics.json`
-
-  ```json
-  [{"id": "phy-e-001", "subject": "physics", "level": "easy", "q": "TEST", "answers": ["a"], "match": "one"}]
-  ```
+### Deck, visibility and PWA (test builds; each serves its own build)
 
 ```sh
-node scripts/checks/visibility-check.cjs /tmp/varB B
-node scripts/checks/visibility-check.cjs /tmp/varC C
+node scripts/checks/test-build.cjs test-subjects /tmp/msq/test-subjects
+node scripts/checks/test-build.cjs some-missing  /tmp/msq/some-missing
+node scripts/checks/test-build.cjs nothing-ready /tmp/msq/nothing-ready
+node scripts/checks/test-build.cjs real          /tmp/msq/real
+node scripts/checks/test-build.cjs updated       /tmp/msq/updated
+
+node scripts/checks/deck-check.cjs /tmp/msq/test-subjects                  # port 4191
+node scripts/checks/visibility-check.cjs /tmp/msq/some-missing B           # port 4190
+node scripts/checks/visibility-check.cjs /tmp/msq/nothing-ready C          # port 4190
+node scripts/checks/pwa-check.cjs /tmp/msq/real /tmp/msq/updated           # port 4180
 ```
 
-### PWA check (two versions)
+Afterwards, `git status data/` should show nothing.
 
-- **v1:** `npm run build` with the real questions, copy `dist/` to e.g. `/tmp/v1`.
-- **v2:** temporarily change `"What is the capital of Nigeria?"` in `general.json` to
-  `"UPDATED: What is the capital of Nigeria?"`, run `npm run build`, copy `dist/` to e.g. `/tmp/v2`.
+## If the questions change
 
-```sh
-node scripts/checks/pwa-check.cjs /tmp/v1 /tmp/v2
-```
-
-## Afterwards: put the questions back
-
-The deck, visibility and PWA checks all need temporary changes to `data/questions/`. **Never
-commit them.** When you're done:
-
-```sh
-rm -f data/questions/physics.json data/questions/chemistry.json   # only if they're test files
-git checkout -- data/questions
-git status data/                                                   # should show nothing
-npm run build
-```
-
-Check the `rm` line first: if Physics or Chemistry ever get real question files, don't delete them.
+- `flow-check` expects every subject to be ready and lists each department's subjects in order.
+  Update `EXPECTED_SUBJECTS` there if subjects are added, removed or reordered.
+- It also opens a few specific questions by id (`com-e-001`, `com-e-002`, `com-e-003`,
+  `com-m-001`, `com-h-002`). If those change, pick others with the same properties: one answer,
+  `match: "all"`, and a "Mention one" question with a note.
+- `style-check` finds the longest question, the longest answer list and a General medium question
+  with a note on its own.
+- `test-build.cjs` changes the text "What is the capital of Nigeria?" for the `updated` build; if
+  that question changes, update the text there.
 
 ## Screenshot sheets (optional)
 

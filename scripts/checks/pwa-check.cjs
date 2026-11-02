@@ -1,9 +1,11 @@
 // Installability, offline use, background updates and Reset questions applying an update.
-// Serves two builds itself (port 4180): node pwa-check.cjs <v1 build folder> <v2 build folder>. See README.md.
+// Uses two builds from test-build.cjs: "real" (v1) and "updated" (v2, gen-e-001 text changed in a
+// temporary copy of the repo). Serves them itself (port 4180); never touches data/questions/.
+// Usage: node scripts/checks/pwa-check.cjs <v1 build folder> <v2 build folder>
 const { chromium } = require('playwright')
 const http = require('http'), fs = require('fs'), path = require('path')
 const [V1, V2] = process.argv.slice(2).map((d) => path.resolve(d || ''))
-if (!process.argv[3]) { console.error('Usage: node pwa-check.cjs <v1 build folder> <v2 build folder>'); process.exit(2) }
+if (!process.argv[3]) { console.error('Usage: node scripts/checks/pwa-check.cjs <v1 build folder> <v2 build folder>\nBuild them with test-build.cjs: variants "real" and "updated".'); process.exit(2) }
 const PORT = 4180, URL = `http://localhost:${PORT}/`
 let fails = 0
 const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++ }
@@ -111,7 +113,7 @@ const stop = () => new Promise((r) => { server.closeAllConnections(); server.clo
     ok((await bundle(p)) === v2Bundle, 'fresh open runs v2')
     let seen = false
     await btn('General').click()
-    for (let i = 0; i < 8 && !seen; i++) {
+    for (let i = 0; i < 20 && !seen; i++) {   // two full rounds of General easy
       seen = (await p.locator('.question').textContent()).startsWith('UPDATED:')
       if (!seen) await btn('Swap question').click()
     }

@@ -1,16 +1,18 @@
 // Screenshots every screen at two phone sizes and checks layout, tap sizes, contrast, focus,
 // motion and wording. Needs `npm run preview` on port 4173. Screenshots go to output/shots/.
+// Only reads data/questions/.
 const { chromium } = require('playwright')
 const fs = require('fs'), path = require('path')
+const { KEY, readQuestions, openQuestion, deckStartingWith } = require('./lib.cjs')
 const URL = 'http://localhost:4173'
-const KEY = 'miyagi-street-quiz'
 const SHOTS = path.join(__dirname, 'output', 'shots')
 fs.mkdirSync(SHOTS, { recursive: true })
-const qdir = path.join(__dirname, '..', '..', 'data', 'questions')
-const all = fs.readdirSync(qdir).flatMap((f) => JSON.parse(fs.readFileSync(path.join(qdir, f), 'utf8')))
+const all = readQuestions()
+const byId = (id) => all.find((q) => q.id === id)
 const longestQ = all.reduce((a, b) => (b.q.length > a.q.length ? b : a))
 const mostAnswers = all.reduce((a, b) => (b.answers.length > a.answers.length ? b : a))
-console.log(`longest question: ${longestQ.id} (${longestQ.q.length} chars); most answers: ${mostAnswers.id} (${mostAnswers.answers.length})`)
+const noteQ = all.find((q) => q.note && q.subject === 'general' && q.level === 'medium')
+console.log(`longest question: ${longestQ.id} (${longestQ.q.length} chars); most answers: ${mostAnswers.id} (${mostAnswers.answers.length}); note: ${noteQ.id}`)
 let fails = 0
 const ok = (c, m) => { if (!c) { console.log('FAIL ' + m); fails++ } else console.log('PASS ' + m) }
 
@@ -79,39 +81,34 @@ async function audit(p, label) {
     const p = await ctx.newPage()
     const errs = []; p.on('pageerror', (e) => errs.push(e.message))
     const btn = (n) => p.getByRole('button', { name: n, exact: true })
-    const btnStart = (n) => p.getByRole('button', { name: new RegExp('^' + n) })
     let n = 0
     const shot = async (name, opts = {}) => {
       await p.evaluate(() => document.fonts.ready)
       await audit(p, `${size.name} ${name}`)
       await p.screenshot({ path: path.join(SHOTS, `${size.name}-${String(++n).padStart(2, '0')}-${name}.png`), ...opts })
     }
-    // Seed decks so specific questions come up.
-    const seed = async (decks) => {
-      await p.evaluate(([k, v]) => localStorage.setItem(k, JSON.stringify(v)), [KEY, { decks }])
-      await p.reload()
-    }
     await p.goto(URL)
-    await seed({})
+    await p.evaluate(([k]) => localStorage.setItem(k, JSON.stringify({ decks: {} })), [KEY])
+    await p.reload()
 
     await shot('route')
     await btn('Menu').click(); await shot('route-menu'); await btn('Menu').click()
     await btn('By department').click(); await shot('department')
     for (const d of ['Science', 'Commercial', 'Art']) { await btn(d).click(); await shot('subject-' + d.toLowerCase()); await btn('← Back').click() }
 
-    // Commerce: easy single answer, medium "all", hard 10 answers
-    await seed({
-      'commerce:easy': { order: ['com-e-001', 'com-e-002'], next: 0 },
-      'commerce:medium': { order: ['com-m-001', 'com-m-002'], next: 0 },
-      'commerce:hard': { order: [mostAnswers.id, 'com-h-001'], next: 0 },
-    })
-    await btn('By department').click(); await btn('Commercial').click(); await btnStart('Commerce').click()
+    const toScore = async () => { while (!(await p.locator('.score').isVisible())) await btn('Got it').click() }
+
+    // Commerce: a one-answer easy question, then an "all of these" medium question
+    await openQuestion(p, all, byId('com-e-001'), { 'commerce:medium': deckStartingWith(all, 'commerce', 'medium', ['com-m-001']) })
     await shot('question-easy')
     await btn('Got it').click()
     ok((await btn('← Back').count()) === 0, `${size.name}: no Back after marking`)
     await shot('question-all-of-these-no-back')
-    await btn('Missed it').click()
-    await shot('question-10-answers-top')
+
+    // The question with the most answers, scrolled to the top and the bottom
+    await openQuestion(p, all, mostAnswers)
+    ok((await p.locator('.answer li').count()) === mostAnswers.answers.length, `${size.name}: ${mostAnswers.id} shows all ${mostAnswers.answers.length} answers`)
+    await shot('question-most-answers-top')
     await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     const clear = await p.evaluate(() => {
       const last = [...document.querySelectorAll('.answer li')].pop().getBoundingClientRect()
@@ -119,31 +116,20 @@ async function audit(p, label) {
       return { lastBottom: last.bottom, barTop: bar.top, barBottom: bar.bottom, vh: window.innerHeight }
     })
     ok(clear.lastBottom <= clear.barTop && Math.abs(clear.barBottom - clear.vh) < 1, `${size.name}: last of ${mostAnswers.answers.length} answers fully visible above the fixed buttons (${Math.round(clear.lastBottom)} <= ${Math.round(clear.barTop)})`)
-    await shot('question-10-answers-bottom')
-    await btn('Got it').click()
+    await shot('question-most-answers-bottom')
+    await toScore()
     await shot('score')
 
-    // Longest question + note (General / Biology)
-    await btn('Next person').click()
-    const lqKey = `${longestQ.subject}:${longestQ.level}`
-    const noteQ = all.find((q) => q.note && q.subject === 'general' && q.level === 'medium')
-    const firstThen = (q) => ({ order: [q.id, ...all.filter((x) => x.subject === q.subject && x.level === q.level && x.id !== q.id).map((x) => x.id)], next: 0 })
-    const decks = { [lqKey]: firstThen(longestQ), 'general:medium': firstThen(noteQ) }
-    await seed(decks)
-    if (longestQ.subject === 'general') { await btn('General').click() } else {
-      const dept = { biology: 'Science', commerce: 'Commercial', government: 'Art' }[longestQ.subject]
-      await btn('By department').click(); await btn(dept).click(); await btnStart(longestQ.subject[0].toUpperCase() + longestQ.subject.slice(1)).click()
-      for (const lvl of ['easy', 'medium', 'hard']) { if (lvl === longestQ.level) break; await btn('Got it').click() }
-    }
+    // Longest question
+    await openQuestion(p, all, longestQ)
     ok((await p.locator('.question').textContent()) === longestQ.q, `${size.name}: longest question shown`)
     await shot('question-longest')
-    p.once('dialog', (d) => d.accept()); await btn('End quiz').click()
-    await btn('General').click(); await btn('Got it').click()
-    ok(await p.locator('.note').isVisible(), `${size.name}: note visible`)
-    await shot('question-note')
 
-    // Score with misses for the camera shot
-    await btn('Missed it').click(); await btn('Got it').click()
+    // A question with a note, then a mixed score for the camera shot
+    await openQuestion(p, all, noteQ)
+    ok((await p.locator('.note').textContent()) === noteQ.note, `${size.name}: note visible`)
+    await shot('question-note')
+    await btn('Missed it').click(); await toScore()
     await shot('score-mixed')
 
     // Focus visible
