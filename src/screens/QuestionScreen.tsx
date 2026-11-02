@@ -1,16 +1,17 @@
-import { LEVELS, LEVEL_NAMES, SUBJECT_NAMES, countFor, type Question } from '../questions.ts'
+import { LEVEL_NAMES, SUBJECT_NAMES, type Question } from '../questions.ts'
 
 type Props = {
   question: Question
   number: number
+  total: number
+  canSwap: boolean
   onSwap: () => void
   onMark: (gotIt: boolean) => void
   onBack?: () => void
   onEnd: () => void
 }
 
-export default function QuestionScreen({ question, number, onSwap, onMark, onBack, onEnd }: Props) {
-  const canSwap = countFor(question.subject, question.level) > 1
+export default function QuestionScreen({ question, number, total, canSwap, onSwap, onMark, onBack, onEnd }: Props) {
 
   let answersLabel = 'Answer'
   if (question.match === 'all') answersLabel = 'Answer · all of these'
@@ -34,15 +35,15 @@ export default function QuestionScreen({ question, number, onSwap, onMark, onBac
       </header>
 
       <div className="progress-bar" aria-hidden="true">
-        {LEVELS.map((level, i) => (
-          <span key={level} className={i < number ? 'done' : undefined} />
+        {Array.from({ length: total }, (_, i) => (
+          <span key={i} className={i < number ? 'done' : undefined} />
         ))}
       </div>
 
       <div className="content">
         <p className="meta progress">
           <span className="level">
-            {LEVEL_NAMES[question.level]} · {number} of 3
+            {LEVEL_NAMES[question.level]} · {number} of {total}
           </span>
           <span className="sep"> · </span>
           <span className="subject">{SUBJECT_NAMES[question.subject]}</span>

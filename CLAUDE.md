@@ -1,6 +1,6 @@
 # Miyagi Street Quiz
 
-A phone app (PWA) used by an interviewer during street quizzes with JAMB students in Lagos. The interviewer taps through the flow as the conversation happens: route, department, subject, then three questions (easy, medium, hard), then a score.
+A phone app (PWA) used by an interviewer during street quizzes with JAMB students in Lagos. The interviewer taps through the flow as the conversation happens: route, department, subject (or Mixed), how many questions (3, 5, 7 or 10, climbing from easy to hard), the questions, then a score.
 
 **Read `docs/spec.md` before starting any task.** It is the source of truth for the flow, the rules for questions, and the deck logic.
 

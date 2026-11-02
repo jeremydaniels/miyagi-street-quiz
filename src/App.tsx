@@ -1,25 +1,36 @@
 import { useState } from 'react'
-import { LEVELS, type Department, type Question } from './questions.ts'
-import { draw, resetQuestions } from './decks.ts'
+import { type Department, type Question } from './questions.ts'
+import { resetQuestions } from './decks.ts'
 import { applyWaitingUpdate } from './pwa.ts'
+import { canSwap, choiceLabel, drawQuestion, levelPlan, type Choice, type Count } from './quiz.ts'
 import RouteScreen from './screens/RouteScreen.tsx'
 import DepartmentScreen from './screens/DepartmentScreen.tsx'
 import SubjectScreen from './screens/SubjectScreen.tsx'
+import CountScreen from './screens/CountScreen.tsx'
 import QuestionScreen from './screens/QuestionScreen.tsx'
 import ScoreScreen, { type Result } from './screens/ScoreScreen.tsx'
+
+type Quiz = { choice: Choice; count: Count }
 
 type Screen =
   | { name: 'route' }
   | { name: 'department' }
   | { name: 'subject'; department: Department }
-  | { name: 'question'; department: Department | null; question: Question; results: Result[] }
-  | { name: 'score'; results: Result[] }
+  | { name: 'count'; choice: Choice }
+  | { name: 'question'; quiz: Quiz; question: Question; results: Result[] }
+  | { name: 'score'; quiz: Quiz; results: Result[] }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'route' })
 
-  function startQuiz(subject: string, department: Department | null) {
-    setScreen({ name: 'question', department, question: draw(subject, 'easy'), results: [] })
+  function startQuiz(choice: Choice, count: Count) {
+    const first = levelPlan(count)[0]
+    setScreen({ name: 'question', quiz: { choice, count }, question: drawQuestion(choice, first), results: [] })
+  }
+
+  // The screen before "How many questions?": Subject on the Department route, start on General.
+  function beforeCount(choice: Choice): Screen {
+    return choice.department ? { name: 'subject', department: choice.department } : { name: 'route' }
   }
 
   switch (screen.name) {
@@ -27,7 +38,7 @@ export default function App() {
       return (
         <RouteScreen
           onDepartment={() => setScreen({ name: 'department' })}
-          onGeneral={() => startQuiz('general', null)}
+          onGeneral={() => setScreen({ name: 'count', choice: { kind: 'subject', subject: 'general', department: null } })}
           onResetQuestions={() => {
             resetQuestions()
             // The reset is already saved, so this is the one safe moment to switch versions.
@@ -44,39 +55,51 @@ export default function App() {
         />
       )
 
-    case 'subject':
+    case 'subject': {
+      const { department } = screen
       return (
         <SubjectScreen
-          department={screen.department}
-          onPick={(subject) => startQuiz(subject, screen.department)}
+          department={department}
+          onPick={(subject) => setScreen({ name: 'count', choice: { kind: 'subject', subject, department } })}
+          onMixed={() => setScreen({ name: 'count', choice: { kind: 'mixed', department } })}
           onBack={() => setScreen({ name: 'department' })}
         />
       )
+    }
+
+    case 'count': {
+      const { choice } = screen
+      return (
+        <CountScreen
+          label={choiceLabel(choice)}
+          onPick={(count) => startQuiz(choice, count)}
+          onBack={() => setScreen(beforeCount(choice))}
+        />
+      )
+    }
 
     case 'question': {
-      const { department, question, results } = screen
-      // Back is only offered before anything has been marked.
-      const onBack =
-        results.length > 0
-          ? undefined
-          : () =>
-              setScreen(department ? { name: 'subject', department } : { name: 'route' })
+      const { quiz, question, results } = screen
+      const plan = levelPlan(quiz.count)
       return (
         <QuestionScreen
           key={question.id}
           question={question}
           number={results.length + 1}
-          onBack={onBack}
+          total={quiz.count}
+          canSwap={canSwap(quiz.choice, question.level)}
+          // Back is only offered before anything has been marked.
+          onBack={results.length > 0 ? undefined : () => setScreen({ name: 'count', choice: quiz.choice })}
           onSwap={() =>
-            setScreen({ ...screen, question: draw(question.subject, question.level) })
+            setScreen({ ...screen, question: drawQuestion(quiz.choice, question.level, question.subject) })
           }
           onMark={(gotIt) => {
             const nextResults = [...results, { question, gotIt }]
-            const nextLevel = LEVELS[nextResults.length]
+            const nextLevel = plan[nextResults.length]
             setScreen(
               nextLevel
-                ? { ...screen, question: draw(question.subject, nextLevel), results: nextResults }
-                : { name: 'score', results: nextResults },
+                ? { ...screen, question: drawQuestion(quiz.choice, nextLevel, question.subject), results: nextResults }
+                : { name: 'score', quiz, results: nextResults },
             )
           }}
           onEnd={() => setScreen({ name: 'route' })}
@@ -87,6 +110,7 @@ export default function App() {
     case 'score':
       return (
         <ScoreScreen
+          label={choiceLabel(screen.quiz.choice)}
           results={screen.results}
           onNextPerson={() => setScreen({ name: 'route' })}
         />

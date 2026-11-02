@@ -349,12 +349,13 @@ button.pill {
    Question screen
    ========================================================================== */
 .progress-bar {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: var(--space-1);
 }
 
+/* One segment per question */
 .progress-bar span {
+  flex: 1;
   height: var(--progress-height);
   background: var(--color-progress-upcoming);
   border-radius: var(--radius-pill);

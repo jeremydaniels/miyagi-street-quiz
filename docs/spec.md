@@ -22,7 +22,7 @@ Heading: "Which department?". Three buttons: **Science**, **Commercial**, **Art*
 
 ### 3. Subject (Department route only)
 
-The department name (small, in orange) above the heading "Best subject?", then the ready subjects for that department (see below). Back goes to Department.
+The department name (small, in orange) above the heading "Best subject?", then **Mixed** (the orange primary button) followed by the ready subjects for that department (see below). Picking a subject or Mixed goes to "How many questions?". Back goes to Department.
 
 | Department | Subjects |
 |---|---|
@@ -32,7 +32,9 @@ The department name (small, in orange) above the heading "Best subject?", then t
 
 Mathematics and English are the same subject wherever they appear (one shared pool each).
 
-The General route skips screens 2 and 3 and uses the `general` subject.
+The General route skips screens 2 and 3 and uses the `general` subject: **General** goes straight to "How many questions?".
+
+**Mixed** draws each question from any ready subject in the department (including English and Mathematics), picking a subject at random but not the subject of the question just shown, where another is available. Swap question picks the same way. Mixed is only shown when the department has at least two ready subjects.
 
 Only ready subjects are shown:
 
@@ -42,13 +44,26 @@ Only ready subjects are shown:
 - If nothing is ready at all, the Route screen shows "There are no questions yet." instead of buttons.
 - If a level has only one question, **Swap question** is disabled on that screen.
 
-### 4. Questions (three screens)
+### 4. How many questions?
 
-Always three questions, in order: **Easy**, **Medium**, **Hard**. Each screen shows, top to bottom:
+What was picked (small, in orange: e.g. "Biology", "Science · Mixed" or "General") above the heading "How many questions?", then four buttons: **3**, **5**, **7**, **10**. Back goes to Subject on the Department route, or to Route on the General route.
 
-- A thin three-part progress bar, then the level and progress as a tag (e.g. "Easy · 1 of 3") and the subject name
+### 5. Questions
+
+As many questions as chosen. Difficulty always climbs from easy to hard:
+
+| Count | Easy | Medium | Hard |
+|---|---|---|---|
+| 3 | 1 | 1 | 1 |
+| 5 | 2 | 2 | 1 |
+| 7 | 3 | 2 | 2 |
+| 10 | 4 | 3 | 3 |
+
+Each question is drawn from its subject's deck for that level (see Deck logic), so there are no repeats until a deck runs out. Each screen shows, top to bottom:
+
+- A thin progress bar with one segment per question, then the level and progress as a tag (e.g. "Medium · 4 of 7") and the question's own subject name (in Mixed this changes from question to question)
 - The question, in large text
-- **Swap question**, directly under the question: draws the next question from the same deck. For when the student or the crowd has already heard it. Available until the question is marked.
+- **Swap question**, directly under the question: draws another question for the same level, from the same deck (or, in Mixed, the same pool of subjects). For when the student or the crowd has already heard it. Available until the question is marked.
 - The answer section, shown straight away (there's no separate reveal step):
   - Label it "Answer". If `match` is `"one"` and there's more than one answer, label it "Answer · any one of these".
   - If `match` is `"all"`, label it "Answer · all of these".
@@ -57,13 +72,13 @@ Always three questions, in order: **Easy**, **Medium**, **Hard**. Each screen sh
 
 The interviewer judges close matches. Students won't always use textbook wording.
 
-Every question screen also has a small **End quiz** button, kept apart from the main buttons so it can't be tapped by accident. It asks "End this quiz?" and, if confirmed, returns to Route. It's there for when a student walks off mid-quiz.
+Back (before the first question is marked) goes to "How many questions?". Every question screen also has a small **End quiz** button, kept apart from the main buttons so it can't be tapped by accident. It asks "End this quiz?" and, if confirmed, returns to Route. It's there for when a student walks off mid-quiz.
 
-### 5. Score
+### 6. Score
 
-- The Miyagi mark, the subject name and a big score, e.g. **2/3**
-- A short recap of the three questions with a tick or cross
-- **Next person**: returns to Route
+- The Miyagi mark, the subject name ("General", or the department name and "Mixed", e.g. "Science · Mixed") and a big score out of the chosen count, e.g. **6/7**
+- A recap of every question with a tick or cross. If it doesn't fit, the page scrolls.
+- **Next person**, fixed to the bottom of the screen: returns to Route
 
 ## Rules for questions
 

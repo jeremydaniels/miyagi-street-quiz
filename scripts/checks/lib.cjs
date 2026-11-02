@@ -30,8 +30,13 @@ function deckStartingWith(all, subject, level, firstIds = []) {
   return { order: [...firstIds, ...rest], next: 0 }
 }
 
-// Saves decks, reloads, then opens `q` on its own question screen (marking earlier levels Got it).
-async function openQuestion(p, all, q, extraDecks = {}) {
+// How many easy/medium/hard questions each count has (difficulty always climbs).
+const SPLITS = { 3: [1, 1, 1], 5: [2, 2, 1], 7: [3, 2, 2], 10: [4, 3, 3] }
+const levelPlan = (count) => SPLITS[count].flatMap((n, i) => Array(n).fill(LEVELS[i]))
+
+// Saves decks, reloads, then starts a `count`-question quiz in q's subject and opens `q` as the first
+// question of its level (marking earlier questions Got it).
+async function openQuestion(p, all, q, extraDecks = {}, count = 3) {
   const decks = { ...extraDecks }
   for (const level of LEVELS) {
     decks[`${q.subject}:${level}`] = deckStartingWith(all, q.subject, level, level === q.level ? [q.id] : [])
@@ -49,10 +54,9 @@ async function openQuestion(p, all, q, extraDecks = {}) {
     await btn(DEPARTMENT_NAMES[dept]).click()
     await btn(SUBJECT_NAMES[q.subject]).click()
   }
-  for (const level of LEVELS) {
-    if (level === q.level) break
-    await btn('Got it').click()
-  }
+  await btn(String(count)).click()
+  const before = levelPlan(count).indexOf(q.level)
+  for (let i = 0; i < before; i++) await btn('Got it').click()
 }
 
 // Tiny static server for a built app folder (SPA fallback, no caching, like Vercel).
@@ -78,4 +82,4 @@ function requireBuildDir(arg, usage) {
   return path.resolve(arg)
 }
 
-module.exports = { ROOT, KEY, LEVELS, readQuestions, SUBJECT_NAMES, readDepartments, deckStartingWith, openQuestion, serve, stopServer, requireBuildDir }
+module.exports = { ROOT, KEY, LEVELS, SPLITS, levelPlan, readQuestions, SUBJECT_NAMES, readDepartments, deckStartingWith, openQuestion, serve, stopServer, requireBuildDir }

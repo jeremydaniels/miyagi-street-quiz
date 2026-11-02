@@ -3,7 +3,7 @@
 // repo. Serves that build itself on port 4191; never touches data/questions/.
 // Usage: node scripts/checks/deck-check.cjs <test-subjects build folder>
 const { chromium } = require('playwright')
-const { KEY, readQuestions, serve, stopServer, requireBuildDir } = require('./lib.cjs')
+const { KEY, readQuestions, serve, stopServer, requireBuildDir, levelPlan } = require('./lib.cjs')
 const DIR = requireBuildDir(process.argv[2], 'Usage: node scripts/checks/deck-check.cjs <test-subjects build folder>\nBuild it with: node scripts/checks/test-build.cjs test-subjects <folder>')
 const PORT = 4191, URL = `http://localhost:${PORT}/`
 let fails = 0
@@ -26,7 +26,7 @@ const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...
   const lastOf = async (key) => (await st()).decks[key].last
   const setSaved = async (val) => { await p.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, typeof val === 'string' ? val : JSON.stringify(val)]); await p.reload() }
   const endQuiz = async () => { p.once('dialog', (d) => d.accept()); await btn('End quiz').click() }
-  const toSubject = async (subj) => { await btn('By department').click(); await btn('Science').click(); await btn(subj).click() }
+  const toSubject = async (subj, count = 3) => { await btn('By department').click(); await btn('Science').click(); await btn(subj).click(); await btn(String(count)).click() }
 
   await p.goto(URL)
   await p.evaluate(() => localStorage.clear()); await p.reload()
@@ -34,9 +34,9 @@ const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...
   console.log('-- 1. not-ready subjects hidden; single-question Swap disabled')
   await btn('By department').click(); await btn('Science').click()
   const shown = (await p.locator('.buttons button').allTextContents()).map((t) => t.trim())
-  ok(JSON.stringify(shown) === JSON.stringify(['Physics', 'Chemistry', 'Biology', 'Mathematics', 'Agric', 'English', 'Test Deck', 'Test Single']), `Science shows ready subjects only, Test Partial (no hard questions) hidden: ${shown}`)
+  ok(JSON.stringify(shown) === JSON.stringify(['Mixed', 'Physics', 'Chemistry', 'Biology', 'Mathematics', 'Agric', 'English', 'Test Deck', 'Test Single']), `Science shows ready subjects only, Test Partial (no hard questions) hidden: ${shown}`)
   ok((await p.getByText(/questions yet/i).count()) === 0 && (await p.locator('button:disabled').count()) === 0, 'no disabled subjects or "questions yet" labels')
-  await btn('Test Single').click()
+  await btn('Test Single').click(); await btn('3').click()
   ok(await btn('Swap question').isDisabled(), 'Test Single easy: Swap disabled (one question)')
   await btn('Got it').click()
   ok((await meta()).startsWith('Medium') && await btn('Swap question').isDisabled(), 'Test Single medium: Swap disabled')
@@ -56,7 +56,7 @@ const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...
     ok(noRepeat, `${key}: no back-to-back repeat incl. across reshuffles`)
   }
   await cycle(() => toSubject('Test Deck'), 'testdeck:easy', TDK_E, 6)
-  await cycle(() => btn('General').click(), 'general:easy', GEN_E, 3)
+  await cycle(async () => { await btn('General').click(); await btn('3').click() }, 'general:easy', GEN_E, 3)
   await p.evaluate(() => localStorage.clear()); await p.reload()
   let twoOk = true, prev = null
   for (let i = 0; i < 6; i++) {
@@ -65,6 +65,26 @@ const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...
     await endQuiz()
   }
   ok(twoOk, 'testdeck:hard (2 cards) alternates across 6 quizzes')
+
+  console.log('-- 2b. long quizzes on small decks; Mixed pool')
+  await p.evaluate(() => localStorage.clear()); await p.reload()
+  await toSubject('Test Single', 10)
+  const singleLevels = []
+  for (let i = 0; i < 10; i++) { singleLevels.push((await meta()).split(' · ')[0].toLowerCase()); await btn('Got it').click() }
+  ok(JSON.stringify(singleLevels) === JSON.stringify(levelPlan(10)), 'Test Single (1 card per level): 10-question quiz follows the 4/3/3 split, repeating its cards')
+  ok((await p.locator('.score').textContent()) === '10/10', 'Test Single 10-question quiz completes: 10/10')
+  await btn('Next person').click()
+  await btn('By department').click(); await btn('Science').click(); await btn('Mixed').click(); await btn('10').click()
+  const mixedSubjects = []
+  for (let i = 0; i < 10; i++) {
+    mixedSubjects.push(await p.locator('.progress .subject').textContent())
+    if (i === 3) { await btn('Swap question').click(); mixedSubjects.push(await p.locator('.progress .subject').textContent()) }
+    await btn('Got it').click()
+  }
+  ok(!mixedSubjects.includes('Test Partial'), 'Mixed never uses the hidden Test Partial subject')
+  ok(mixedSubjects.every((s, i) => i === 0 || s !== mixedSubjects[i - 1]), `Mixed: no subject twice in a row, incl. after Swap (${mixedSubjects.join(', ')})`)
+  ok((await p.locator('.score-subject').textContent()) === 'Science · Mixed', 'score label "Science · Mixed"')
+  await btn('Next person').click()
 
   console.log('-- 3. survives reload')
   await p.evaluate(() => localStorage.clear()); await p.reload()
@@ -158,7 +178,7 @@ const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...
   const p2 = await ctx2.newPage(); const errs2 = []; p2.on('pageerror', (e) => errs2.push(e.message))
   await p2.goto(URL)
   const b2 = (n) => p2.getByRole('button', { name: n, exact: true })
-  await b2('General').click()
+  await b2('General').click(); await b2('3').click()
   for (let i = 0; i < 3; i++) await b2('Got it').click()
   ok((await p2.locator('.score').isVisible()) && errs2.length === 0, 'full quiz works with storage blocked ' + errs2.join('; '))
   await b2('Next person').click()

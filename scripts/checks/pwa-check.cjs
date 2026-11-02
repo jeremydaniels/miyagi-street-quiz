@@ -38,7 +38,11 @@ const stop = () => new Promise((r) => { server.closeAllConnections(); server.clo
     return { btn, btnStart, meta, answerAll, onStart }
   }
   const swReady = (p) => p.evaluate(async () => { await navigator.serviceWorker.ready; return !!navigator.serviceWorker.controller })
-  const waitWaiting = (p) => p.waitForFunction(async () => !!(await navigator.serviceWorker.getRegistration())?.waiting, null, { timeout: 20000, polling: 200 })
+  // Hold the page's own registration object before a deploy, then wait until *it* shows the waiting
+  // version. Asking for a fresh copy (getRegistration) can report it a few ms before the app's own
+  // copy does, and tapping Reset questions in that gap correctly does a plain reset with no reload.
+  const holdRegistration = (p) => p.evaluate(async () => { window.__reg = await navigator.serviceWorker.ready })
+  const waitWaiting = (p) => p.waitForFunction(() => window.__reg.waiting?.state === 'installed', null, { timeout: 20000, polling: 100 })
   const bundle = (p) => p.evaluate(() => document.querySelector('script[type=module]').getAttribute('src'))
   const v1Bundle = '/assets/' + fs.readFileSync(path.join(V1, 'index.html'), 'utf8').match(/index-[^"]+\.js/)[0]
   const v2Bundle = '/assets/' + fs.readFileSync(path.join(V2, 'index.html'), 'utf8').match(/index-[^"]+\.js/)[0]
@@ -75,11 +79,11 @@ const stop = () => new Promise((r) => { server.closeAllConnections(); server.clo
     await p.evaluate(() => document.fonts.ready)
     ok(await p.evaluate(() => [...document.fonts].some((f) => f.family.replace(/"/g, '') === 'Outfit' && f.status === 'loaded')), 'Outfit font loads offline')
     ok(await p.evaluate(() => { const i = document.querySelector('img.logo'); return i.complete && i.naturalWidth > 0 }), 'logo loads offline')
-    await btn('By department').click(); await btn('Commercial').click(); await btnStart('Commerce').click()
+    await btn('By department').click(); await btn('Commercial').click(); await btnStart('Commerce').click(); await btn('3').click()
     ok((await meta()).includes('Commerce'), 'Commerce quiz offline')
     await answerAll(); ok((await p.locator('.score').textContent()) === '3/3', 'Commerce score offline')
     await btn('Next person').click()
-    await btn('General').click(); await answerAll(); ok((await p.locator('.score').textContent()) === '3/3', 'General score offline')
+    await btn('General').click(); await btn('3').click(); await answerAll(); ok((await p.locator('.score').textContent()) === '3/3', 'General score offline')
     await btn('Next person').click()
     ok(await onStart(), 'back at start after two offline quizzes')
     ok(failed.length === 0, 'no failed requests ' + failed.join(', '))
@@ -95,8 +99,9 @@ const stop = () => new Promise((r) => { server.closeAllConnections(); server.clo
     await p.goto(URL); await swReady(p); await p.reload()   // a returning user: page controlled by v1
     let navs = 0; p.on('framenavigated', (f) => { if (f === p.mainFrame()) navs++ })
     await p.evaluate(() => { window.__noReload = true })
-    await btn('General').click(); await btn('Got it').click()
+    await btn('General').click(); await btn('3').click(); await btn('Got it').click()
     ok((await meta()).startsWith('Medium'), 'mid-quiz on Medium (v1)')
+    await holdRegistration(p)
     root = V2   // deploy
     await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))  // app comes back to screen
     await waitWaiting(p)
@@ -112,7 +117,7 @@ const stop = () => new Promise((r) => { server.closeAllConnections(); server.clo
     await p.goto(URL)
     ok((await bundle(p)) === v2Bundle, 'fresh open runs v2')
     let seen = false
-    await btn('General').click()
+    await btn('General').click(); await btn('3').click()
     for (let i = 0; i < 20 && !seen; i++) {   // two full rounds of General easy
       seen = (await p.locator('.question').textContent()).startsWith('UPDATED:')
       if (!seen) await btn('Swap question').click()
@@ -128,15 +133,16 @@ const stop = () => new Promise((r) => { server.closeAllConnections(); server.clo
     const { btn, answerAll, onStart } = helpers(p)
     const decks = () => p.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('miyagi-street-quiz')).decks).length)
     await p.goto(URL); await swReady(p); await p.reload()
-    await btn('General').click(); await answerAll(); await btn('Next person').click()
+    await btn('General').click(); await btn('3').click(); await answerAll(); await btn('Next person').click()
     ok((await decks()) === 3, 'three decks in use before Reset questions')
     await p.evaluate(() => { window.__noReload = true })
     let navs = 0; p.on('framenavigated', (f) => { if (f === p.mainFrame()) navs++ })
     await btn('Menu').click(); p.once('dialog', (d) => d.accept()); await btn('Reset questions').click()
     await p.waitForTimeout(1500)
     ok((await decks()) === 0 && navs === 0 && (await p.evaluate(() => window.__noReload === true)), 'no update waiting: decks reset, no reload')
-    await btn('General').click(); await answerAll(); await btn('Next person').click()
+    await btn('General').click(); await btn('3').click(); await answerAll(); await btn('Next person').click()
     ok((await decks()) === 3, 'decks in use again')
+    await holdRegistration(p)
     root = V2
     await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
     await waitWaiting(p)

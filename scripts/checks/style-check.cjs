@@ -95,6 +95,10 @@ async function audit(p, label) {
     await btn('Menu').click(); await shot('route-menu'); await btn('Menu').click()
     await btn('By department').click(); await shot('department')
     for (const d of ['Science', 'Commercial', 'Art']) { await btn(d).click(); await shot('subject-' + d.toLowerCase()); await btn('← Back').click() }
+    await btn('Science').click(); await btn('Biology').click()
+    await shot('count')
+    await btn('← Back').click(); await btn('Mixed').click()
+    await shot('count-mixed')
 
     const toScore = async () => { while (!(await p.locator('.score').isVisible())) await btn('Got it').click() }
 
@@ -131,6 +135,26 @@ async function audit(p, label) {
     await shot('question-note')
     await btn('Missed it').click(); await toScore()
     await shot('score-mixed')
+
+    // A 10-question Mixed quiz: 10-segment progress bar, then a 10-row score that scrolls
+    await p.evaluate(() => localStorage.clear()); await p.reload()
+    await btn('By department').click(); await btn('Science').click(); await btn('Mixed').click(); await btn('10').click()
+    for (let i = 0; i < 6; i++) await btn('Got it').click()
+    ok((await p.locator('.progress-bar span').count()) === 10, `${size.name}: 10 progress segments`)
+    await shot('question-mixed-7-of-10')
+    for (let i = 0; i < 4; i++) await btn(i === 1 ? 'Missed it' : 'Got it').click()
+    await shot('score-10')
+    const sticky = await p.evaluate(() => {
+      const bar = document.querySelector('.actions.sticky').getBoundingClientRect()
+      const scrolls = document.documentElement.scrollHeight > innerHeight
+      window.scrollTo(0, document.body.scrollHeight)
+      const bar2 = document.querySelector('.actions.sticky').getBoundingClientRect()
+      const last = [...document.querySelectorAll('.recap li')].pop().getBoundingClientRect()
+      return { barAtBottom: Math.abs(bar.bottom - innerHeight) < 1, barAtBottom2: Math.abs(bar2.bottom - innerHeight) < 1, lastClear: last.bottom <= bar2.top + 0.5, scrolls }
+    })
+    ok(sticky.barAtBottom && sticky.barAtBottom2, `${size.name}: Next person stays fixed at the bottom (page scrolls: ${sticky.scrolls})`)
+    ok(sticky.lastClear, `${size.name}: last recap row can scroll fully into view above Next person`)
+    await shot('score-10-scrolled')
 
     // Focus visible
     await btn('Next person').click()

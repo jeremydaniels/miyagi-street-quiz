@@ -31,9 +31,9 @@ All commands below are run from the repo root.
 
 | File | What it is |
 |---|---|
-| `flow-check.cjs` | The whole flow on the real questions: start screen, every department's full subject list, answers shown straight away, Swap position and behaviour, "Answer" labels, notes, progress bar, Back rules, End quiz text and position, score and recap, Next person. |
-| `style-check.cjs` | Screenshots of every screen at Android 412×915 and iPhone SE 375×667, plus: no overflow or cut-off text (including the longest question and the longest answer list in the bank), last answer clears the bottom bar, buttons ≥ 56px (top-bar pills 44px), text contrast ≥ 7:1, pill outlines ≥ 3:1, no thin text, Outfit font in use, dot grid only where it belongs, visible focus, no animation, stays light in dark mode, no "route"/"shoot" in any text. |
-| `deck-check.cjs` | Deck logic and saved data: a subject missing a level is hidden, Swap disabled when a level has one question, every card shown before a repeat (made-up 4-card and 2-card decks, and the real 10-card General easy deck), no repeat across a reshuffle, decks survive a reload, new ids join the round, old/broken/stale saved data, Reset questions, blocked storage. |
+| `flow-check.cjs` | The whole flow on the real questions: start screen, every department's full subject list with Mixed first, the "How many questions?" screen and its Back rules, a full quiz at each count (3, 5, 7, 10: levels climb in the right split, tags, one progress segment per question, no repeats, score and recap out of the count), a 10-question Science Mixed quiz (subjects from the pool, never the same twice in a row, including after Swap, "Science · Mixed" on the score), answers shown straight away, Swap position and behaviour, "Answer" labels, notes, progress bar, Back rules, End quiz text and position, score and recap, Next person. |
+| `style-check.cjs` | Screenshots of every screen at Android 412×915 and iPhone SE 375×667, plus: no overflow or cut-off text (including the longest question and the longest answer list in the bank), last answer clears the bottom bar, the count screens, a 10-question Mixed quiz and a 10-row score whose recap scrolls while Next person stays fixed, buttons ≥ 56px (top-bar pills 44px), text contrast ≥ 7:1, pill outlines ≥ 3:1, no thin text, Outfit font in use, dot grid only where it belongs, visible focus, no animation, stays light in dark mode, no "route"/"shoot" in any text. |
+| `deck-check.cjs` | Deck logic and saved data: a subject missing a level is hidden, Swap disabled when a level has one question, a 10-question quiz on one-card levels follows the split and completes, Mixed never uses a hidden subject, every card shown before a repeat (made-up 4-card and 2-card decks, and the real 10-card General easy deck), no repeat across a reshuffle, decks survive a reload, new ids join the round, old/broken/stale saved data, Reset questions, blocked storage. |
 | `visibility-check.cjs` | Hiding rules: a department with no ready subjects and General hidden (variant B); nothing ready shows "There are no questions yet." (variant C). |
 | `pwa-check.cjs` | Installable (Chrome's own checks, iOS tags), works fully offline after one load (including font and logo), updates download quietly with no reload, a fresh open runs the new version, Reset questions applies a waiting update. |
 | `test-build.cjs` | Makes the test builds the last three checks need. |
@@ -95,6 +95,7 @@ Afterwards, `git status data/` should show nothing.
 - It also opens a few specific questions by id (`com-e-001`, `com-e-002`, `com-e-003`,
   `com-m-001`, `com-h-002`). If those change, pick others with the same properties: one answer,
   `match: "all"`, and a "Mention one" question with a note.
+- `lib.cjs` knows the count splits (`SPLITS`); keep it in step with `src/quiz.ts`.
 - `style-check` finds the longest question, the longest answer list and a General medium question
   with a note on its own.
 - `test-build.cjs` changes the text "What is the capital of Nigeria?" for the `updated` build; if
