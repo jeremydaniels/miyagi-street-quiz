@@ -98,9 +98,11 @@ type Question = {
 
 Subject ids: `english`, `physics`, `chemistry`, `biology`, `mathematics`, `agric`, `commerce`, `accounting`, `economics`, `government`, `literature`, `crs`, `irs`, `history`, `general`.
 
+The subject ids and their display names live in `src/subjects.json`. To add a new subject, add it there, add it to the right department in `DEPARTMENT_SUBJECTS` in `src/questions.ts`, then add its question file.
+
 Ids are prefixed by subject and level, e.g. `chm-e-001`, so files never collide.
 
-A build-time validation check fails the build if any question has a duplicate id, an unknown subject or level, an empty `q`, an empty `answers` array, or a subject that doesn't match its file name.
+A build-time validation check fails the build if any file isn't valid JSON or isn't a list, or any question has a missing or duplicate id (across all files), an unknown subject or one that doesn't match its file name, a level that isn't easy, medium or hard, an empty `q`, an empty `answers` array or empty answer, a `match` that isn't "one" or "all", or a `note` that isn't text. It lists every problem, naming the file and question, in plain words. Run it on its own with `npm run check-questions`.
 
 A subject with no questions yet should still appear on the Subject screen, but disabled, with "No questions yet".
 

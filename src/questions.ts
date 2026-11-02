@@ -1,3 +1,5 @@
+import subjectNames from './subjects.json'
+
 export type Level = 'easy' | 'medium' | 'hard'
 
 export type Question = {
@@ -20,23 +22,8 @@ export const LEVEL_NAMES: Record<Level, string> = {
   hard: 'Hard',
 }
 
-export const SUBJECT_NAMES: Record<string, string> = {
-  english: 'English',
-  physics: 'Physics',
-  chemistry: 'Chemistry',
-  biology: 'Biology',
-  mathematics: 'Mathematics',
-  agric: 'Agric',
-  commerce: 'Commerce',
-  accounting: 'Accounting',
-  economics: 'Economics',
-  government: 'Government',
-  literature: 'Literature',
-  crs: 'CRS',
-  irs: 'IRS',
-  history: 'History',
-  general: 'General',
-}
+// Subject ids and display names. Also read by scripts/validate-questions.mjs.
+export const SUBJECT_NAMES: Record<string, string> = subjectNames
 
 export const DEPARTMENT_NAMES: Record<Department, string> = {
   science: 'Science',

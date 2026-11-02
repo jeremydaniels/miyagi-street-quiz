@@ -23,9 +23,10 @@ A phone app (PWA) used by an interviewer during street quizzes with JAMB student
 ## Data
 
 - The question bank is the folder `data/questions/`, one JSON file per subject (`biology.json`, `general.json`, ...). It is the source of truth.
-- The app loads every file in that folder automatically (e.g. Vite's `import.meta.glob`), so adding a subject file needs no code change.
+- The app loads every file in that folder automatically (Vite's `import.meta.glob`), so adding a question file for an existing subject needs no code change.
+- Subject ids and display names live in `src/subjects.json`. To add a new subject, add it there, add it to the right department in `DEPARTMENT_SUBJECTS` in `src/questions.ts`, then add its question file.
 - Never write, rewrite, or delete questions unless the task asks for it. Questions are written and checked by hand for Nigerian phrasing.
-- A validation check runs on every build and fails it if any question has a duplicate id, an unknown subject or level, an empty question, or no answers. A file's questions must all match the subject in its file name.
+- A validation check (`scripts/validate-questions.mjs`) runs first on every build and fails it if any question file has a problem: invalid JSON, a missing or duplicate id, an unknown subject or one that doesn't match the file name, a bad level or `match`, an empty question or answer, or a note that isn't text. It lists every problem in plain words. Run it on its own with `npm run check-questions`.
 
 ## Design constraints
 
