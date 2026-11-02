@@ -35,6 +35,6 @@ A phone app (PWA) used by an interviewer during street quizzes with JAMB student
 - End quiz is a deliberate exception to the 56px rule: it's 44px tall and set apart from the main buttons so it's hard to tap by accident.
 - High contrast, readable in bright sunlight.
 - Must work fully offline once installed.
-- Updates download in the background and wait. A new version takes effect only when the app is next opened fresh, or when New shoot is confirmed (after the reset is saved). Nothing else may ever reload the app: no update popups, no reload mid-quiz. See `src/pwa.ts`.
+- Updates download in the background and wait. A new version takes effect only when the app is next opened fresh, or when Reset questions is confirmed (after the reset is saved). Nothing else may ever reload the app: no update popups, no reload mid-quiz. See `src/pwa.ts`.
 - App icons are placeholders in `public/icons/`. To rebrand, replace the files with new ones of the same names and sizes: `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (keep the design inside the middle 80%), `apple-touch-icon.png` (180×180, no transparency) and `favicon.svg`.
 - Every screen needs a clear way back, except after a question has been marked.

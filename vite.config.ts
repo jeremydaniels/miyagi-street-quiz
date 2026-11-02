@@ -33,7 +33,7 @@ export default defineConfig({
         globPatterns: ['**/*.{html,js,css,png,svg}'],
         // (the plugin adds manifest.webmanifest itself)
         cleanupOutdatedCaches: true,
-        // A new version waits until the app is next opened fresh (or New shoot applies it).
+        // A new version waits until the app is next opened fresh (or Reset questions applies it).
         skipWaiting: false,
         clientsClaim: false,
       },

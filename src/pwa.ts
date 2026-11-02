@@ -1,7 +1,7 @@
 // Service worker registration for offline use and quiet background updates.
 //
 // A new version downloads in the background and waits. It takes effect the next
-// time the app is opened fresh, or when New shoot is confirmed (applyWaitingUpdate).
+// time the app is opened fresh, or when Reset questions is confirmed (applyWaitingUpdate).
 // Nothing else may reload the app.
 
 let registration: ServiceWorkerRegistration | undefined

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { LEVEL_NAMES, SUBJECT_NAMES, countFor, type Question } from '../questions.ts'
 
 type Props = {
@@ -11,7 +10,6 @@ type Props = {
 }
 
 export default function QuestionScreen({ question, number, onSwap, onMark, onBack, onEnd }: Props) {
-  const [revealed, setRevealed] = useState(false)
   const canSwap = countFor(question.subject, question.level) > 1
 
   let answersLabel: string | null = null
@@ -19,7 +17,7 @@ export default function QuestionScreen({ question, number, onSwap, onMark, onBac
   else if (question.answers.length > 1) answersLabel = 'Any one of these'
 
   function endQuiz() {
-    if (window.confirm("End this quiz? It won't count.")) onEnd()
+    if (window.confirm('End this quiz?')) onEnd()
   }
 
   return (
@@ -45,45 +43,36 @@ export default function QuestionScreen({ question, number, onSwap, onMark, onBac
         </p>
         <p className="question">{question.q}</p>
 
-        {revealed && (
-          <section className="answer">
-            {answersLabel && <p className="answer-label">{answersLabel}</p>}
-            <ul>
-              {question.answers.map((a) => (
-                <li key={a}>{a}</li>
-              ))}
-            </ul>
-            {question.note && <p className="note">{question.note}</p>}
-          </section>
-        )}
+        <button onClick={onSwap} disabled={!canSwap}>
+          Swap question
+        </button>
+
+        <section className="answer">
+          {answersLabel && <p className="answer-label">{answersLabel}</p>}
+          <ul>
+            {question.answers.map((a) => (
+              <li key={a}>{a}</li>
+            ))}
+          </ul>
+          {question.note && <p className="note">{question.note}</p>}
+        </section>
       </div>
 
       <div className="actions sticky">
-        {!revealed ? (
-          <>
-            <button className="primary" onClick={() => setRevealed(true)}>
-              Show answer
-            </button>
-            <button onClick={onSwap} disabled={!canSwap}>
-              Swap question
-            </button>
-          </>
-        ) : (
-          <div className="pair">
-            <button className="missed" onClick={() => onMark(false)}>
-              <span className="icon" aria-hidden="true">
-                ✗
-              </span>
-              Missed it
-            </button>
-            <button className="got" onClick={() => onMark(true)}>
-              <span className="icon" aria-hidden="true">
-                ✓
-              </span>
-              Got it
-            </button>
-          </div>
-        )}
+        <div className="pair">
+          <button className="missed" onClick={() => onMark(false)}>
+            <span className="icon" aria-hidden="true">
+              ✗
+            </span>
+            Missed it
+          </button>
+          <button className="got" onClick={() => onMark(true)}>
+            <span className="icon" aria-hidden="true">
+              ✓
+            </span>
+            Got it
+          </button>
+        </div>
       </div>
     </main>
   )

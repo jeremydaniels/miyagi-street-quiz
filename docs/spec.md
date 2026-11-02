@@ -10,9 +10,11 @@ The person using the app is the interviewer, not the student.
 
 ### 1. Route
 
-Two big buttons: **Department** and **General**.
+Heading: "What kind of questions?". Two big buttons: **By department** and **General**.
 
-Also on this screen: the person count for the current shoot, and a menu with **New shoot** (see Deck logic).
+Also on this screen: a menu with **Reset questions** (see Deck logic).
+
+The app's text never uses the word "route"; it's only the name used in these docs and the code.
 
 ### 2. Department (Department route only)
 
@@ -20,7 +22,7 @@ Three buttons: **Science**, **Commercial**, **Art**. Back goes to Route.
 
 ### 3. Subject (Department route only)
 
-Shows the subjects for the chosen department, plus English. Back goes to Department.
+Shows the ready subjects for the chosen department (see below). Back goes to Department.
 
 | Department | Subjects |
 |---|---|
@@ -32,37 +34,36 @@ Mathematics and English are the same subject wherever they appear (one shared po
 
 The General route skips screens 2 and 3 and uses the `general` subject.
 
-When a subject can't be played yet:
+Only ready subjects are shown:
 
-- A subject is only playable when it has at least one question at every level (easy, medium and hard). A subject with no questions at all is disabled with "No questions yet". A subject missing only some levels is disabled with a label naming them, e.g. "No hard questions yet".
-- The same rule applies to the **General** button on the Route screen.
+- A subject is ready when it has at least one question at every level (easy, medium and hard). Subjects that aren't ready are hidden, not shown disabled.
+- If `general` isn't ready, the **General** button is hidden.
+- A department with no ready subjects is hidden on the Department screen. If no department has a ready subject, **By department** is hidden.
+- If nothing is ready at all, the Route screen shows "There are no questions yet." instead of buttons.
 - If a level has only one question, **Swap question** is disabled on that screen.
 
 ### 4. Questions (three screens)
 
-Always three questions, in order: **Easy**, **Medium**, **Hard**. Each screen shows:
+Always three questions, in order: **Easy**, **Medium**, **Hard**. Each screen shows, top to bottom:
 
 - The level and progress (e.g. "Easy · 1 of 3") and the subject name
 - The question, in large text
-- **Swap question**: draws the next question from the same deck. For when the student or the crowd has already heard it. Only available before the answer is revealed.
-- **Show answer**: reveals the answer section
-
-After reveal:
-
-- If `match` is `"one"` and there's more than one answer, label the list "Any one of these".
-- If `match` is `"all"`, label it "All of these".
-- Show `note` if present (guidance for the interviewer).
-- Two buttons: **Got it** and **Missed it**. Tapping either moves to the next question. There's no going back after marking.
+- **Swap question**, directly under the question: draws the next question from the same deck. For when the student or the crowd has already heard it. Available until the question is marked.
+- The answer section, shown straight away (there's no separate reveal step):
+  - If `match` is `"one"` and there's more than one answer, label the list "Any one of these".
+  - If `match` is `"all"`, label it "All of these".
+  - Show `note` if present (guidance for the interviewer).
+- Two buttons in a bar fixed to the bottom of the screen: **Missed it** and **Got it**. Tapping either moves to the next question. There's no going back after marking. If the question and answers don't fit, the content scrolls and the bar stays put.
 
 The interviewer judges close matches. Students won't always use textbook wording.
 
-Every question screen also has a small **End quiz** button, kept apart from the main buttons so it can't be tapped by accident. It asks "End this quiz? It won't count." and, if confirmed, returns to Route without adding to the person count. It's there for when a student walks off mid-quiz.
+Every question screen also has a small **End quiz** button, kept apart from the main buttons so it can't be tapped by accident. It asks "End this quiz?" and, if confirmed, returns to Route. It's there for when a student walks off mid-quiz.
 
 ### 5. Score
 
 - Big score, e.g. **2/3**
 - A short recap of the three questions with a tick or cross
-- **Next person**: adds 1 to the person count and returns to Route
+- **Next person**: returns to Route
 
 ## Rules for questions
 
@@ -104,15 +105,15 @@ Ids are prefixed by subject and level, e.g. `chm-e-001`, so files never collide.
 
 A build-time validation check fails the build if any file isn't valid JSON or isn't a list, or any question has a missing or duplicate id (across all files), an unknown subject or one that doesn't match its file name, a level that isn't easy, medium or hard, an empty `q`, an empty `answers` array or empty answer, a `match` that isn't "one" or "all", or a `note` that isn't text. It lists every problem, naming the file and question, in plain words. Run it on its own with `npm run check-questions`.
 
-A subject with no questions yet should still appear on the Subject screen, but disabled, with "No questions yet".
+A subject without questions at every level is hidden from the app (see "Only ready subjects are shown" under the Subject screen).
 
 ## Deck logic
 
 - Each subject and level pair is its own deck, e.g. `government:easy`.
 - A deck is a shuffled list of question ids. Each draw (including a swap) takes the next one.
 - When a deck runs out, reshuffle all of its questions and keep going. If possible, the first card after a reshuffle should not be the one just shown.
-- Decks and the person count are saved on the phone (localStorage), so closing the app mid-shoot doesn't reset anything.
-- **New shoot** reshuffles every deck and resets the person count to 0. Ask for confirmation first.
+- Decks are saved on the phone (localStorage), so closing the app doesn't reset anything.
+- **Reset questions** (in the Route screen's menu) reshuffles every deck, so questions already asked can come up again. It asks "Reset all questions? Questions already asked will come up again." first.
 - When questions are added to the file, new ids join their deck on the next reshuffle (or immediately, if simpler).
 
 ## PWA

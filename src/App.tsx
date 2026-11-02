@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { LEVELS, type Department, type Question } from './questions.ts'
-import { draw, newShoot, savePersonCount, savedPersonCount } from './decks.ts'
+import { draw, resetQuestions } from './decks.ts'
 import { applyWaitingUpdate } from './pwa.ts'
 import RouteScreen from './screens/RouteScreen.tsx'
 import DepartmentScreen from './screens/DepartmentScreen.tsx'
@@ -17,7 +17,6 @@ type Screen =
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'route' })
-  const [personCount, setPersonCount] = useState(savedPersonCount)
 
   function startQuiz(subject: string, department: Department | null) {
     setScreen({ name: 'question', department, question: draw(subject, 'easy'), results: [] })
@@ -27,13 +26,11 @@ export default function App() {
     case 'route':
       return (
         <RouteScreen
-          personCount={personCount}
           onDepartment={() => setScreen({ name: 'department' })}
           onGeneral={() => startQuiz('general', null)}
-          onNewShoot={() => {
-            newShoot()
-            setPersonCount(0)
-            // Decks and count are already saved, so this is the one safe moment to switch versions.
+          onResetQuestions={() => {
+            resetQuestions()
+            // The reset is already saved, so this is the one safe moment to switch versions.
             applyWaitingUpdate()
           }}
         />
@@ -91,12 +88,7 @@ export default function App() {
       return (
         <ScoreScreen
           results={screen.results}
-          onNextPerson={() => {
-            const next = personCount + 1
-            savePersonCount(next)
-            setPersonCount(next)
-            setScreen({ name: 'route' })
-          }}
+          onNextPerson={() => setScreen({ name: 'route' })}
         />
       )
   }

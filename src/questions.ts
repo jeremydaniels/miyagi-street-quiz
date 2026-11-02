@@ -53,18 +53,17 @@ export function countFor(subject: string, level: Level): number {
   return questionsFor(subject, level).length
 }
 
-// Levels with no questions for this subject. A subject is only playable when this is empty.
-export function missingLevels(subject: string): Level[] {
-  return LEVELS.filter((level) => countFor(subject, level) === 0)
+// A subject is ready (shown in the app) only when it has questions at every level.
+export function isReady(subject: string): boolean {
+  return LEVELS.every((level) => countFor(subject, level) > 0)
 }
 
-// Label for a subject that can't be played yet, or null if it's ready.
-export function notReadyLabel(subject: string): string | null {
-  const missing = missingLevels(subject)
-  if (missing.length === 0) return null
-  if (missing.length === LEVELS.length) return 'No questions yet'
-  const names = missing.map((level) => level.toLowerCase())
-  const list =
-    names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}`
-  return `No ${list} questions yet`
+export function readySubjects(department: Department): string[] {
+  return DEPARTMENT_SUBJECTS[department].filter(isReady)
+}
+
+export const DEPARTMENTS: Department[] = ['science', 'commercial', 'art']
+
+export function readyDepartments(): Department[] {
+  return DEPARTMENTS.filter((d) => readySubjects(d).length > 0)
 }

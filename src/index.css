@@ -184,13 +184,6 @@ button:disabled {
   cursor: default;
 }
 
-button .sub {
-  display: block;
-  margin-top: var(--space-1);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-normal);
-}
-
 button.primary {
   color: var(--color-on-accent);
   background: var(--color-accent);
@@ -251,8 +244,17 @@ button.end {
 }
 
 /* ==========================================================================
-   Route screen
+   Start screen
    ========================================================================== */
+button.menu-toggle {
+  margin-left: auto;
+}
+
+.message {
+  font-size: var(--font-size-answer);
+  font-weight: var(--font-weight-bold);
+}
+
 .meta {
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-bold);

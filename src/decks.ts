@@ -1,7 +1,7 @@
 import { questionsFor, type Level, type Question } from './questions.ts'
 
-// One shuffled deck per subject + level, saved with the person count so a
-// closed app picks up where it left off. See "Deck logic" in docs/spec.md.
+// One shuffled deck per subject + level, saved on the phone so a closed app
+// picks up where it left off. See "Deck logic" in docs/spec.md.
 
 type Deck = {
   order: string[] // shuffled question ids
@@ -10,7 +10,6 @@ type Deck = {
 }
 
 type Saved = {
-  personCount: number
   decks: Record<string, Deck>
 }
 
@@ -38,21 +37,21 @@ function isDeck(value: unknown): value is Deck {
 }
 
 // Unreadable entry -> start completely fresh. A single broken deck -> drop just that deck.
+// Older saved data may also hold a person count; it's ignored and dropped on the next save.
 function load(): Saved {
-  const fresh: Saved = { personCount: 0, decks: {} }
+  const fresh: Saved = { decks: {} }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw === null) return fresh
     const data: unknown = JSON.parse(raw)
     if (typeof data !== 'object' || data === null) return fresh
-    const { personCount, decks } = data as Record<string, unknown>
-    if (!Number.isInteger(personCount) || (personCount as number) < 0) return fresh
+    const { decks } = data as Record<string, unknown>
     if (typeof decks !== 'object' || decks === null || Array.isArray(decks)) return fresh
     const kept: Record<string, Deck> = {}
     for (const [key, deck] of Object.entries(decks)) {
       if (isDeck(deck)) kept[key] = { order: deck.order, next: deck.next, last: deck.last }
     }
-    return { personCount: personCount as number, decks: kept }
+    return { decks: kept }
   } catch {
     return fresh
   }
@@ -107,17 +106,8 @@ export function draw(subject: string, level: Level): Question {
   return pool.find((q) => q.id === id)!
 }
 
-export function savedPersonCount(): number {
-  return state.personCount
-}
-
-export function savePersonCount(personCount: number) {
-  state = { ...state, personCount }
-  save()
-}
-
-// Reshuffle every deck (each starts fresh the next time it's used) and reset the count.
-export function newShoot() {
-  state = { personCount: 0, decks: {} }
+// Reshuffle every deck: each starts fresh the next time it's used.
+export function resetQuestions() {
+  state = { decks: {} }
   save()
 }

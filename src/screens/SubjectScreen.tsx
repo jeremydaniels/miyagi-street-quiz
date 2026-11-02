@@ -1,10 +1,4 @@
-import {
-  DEPARTMENT_NAMES,
-  DEPARTMENT_SUBJECTS,
-  SUBJECT_NAMES,
-  notReadyLabel,
-  type Department,
-} from '../questions.ts'
+import { DEPARTMENT_NAMES, SUBJECT_NAMES, readySubjects, type Department } from '../questions.ts'
 
 type Props = {
   department: Department
@@ -24,15 +18,11 @@ export default function SubjectScreen({ department, onPick, onBack }: Props) {
         <h1>{DEPARTMENT_NAMES[department]} subject</h1>
       </div>
       <div className="actions">
-        {DEPARTMENT_SUBJECTS[department].map((subject) => {
-          const notReady = notReadyLabel(subject)
-          return (
-            <button key={subject} onClick={() => onPick(subject)} disabled={notReady !== null}>
-              {SUBJECT_NAMES[subject]}
-              {notReady && <span className="sub">{notReady}</span>}
-            </button>
-          )
-        })}
+        {readySubjects(department).map((subject) => (
+          <button key={subject} onClick={() => onPick(subject)}>
+            {SUBJECT_NAMES[subject]}
+          </button>
+        ))}
       </div>
     </main>
   )
